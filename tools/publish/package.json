@@ -3,7 +3,7 @@
   "description": "Publish a module to the npm registry",
   "license": "Apache-2.0",
   "readme": "README.md",
-  "version": "0.0.1",
+  "version": "0.0.1-dev.1",
   "private": true,
   "homepage": "https://github.com/cloudfoundry-incubator/cf-abacus",
   "bugs": {
@@ -28,7 +28,7 @@
     "publish": "./publish"
   },
   "scripts": {
-    "babel": "babel",
+    "babel": "true",
     "test": "eslint",
     "lint": "eslint",
     "pub": "npm install && ./publish"
@@ -37,7 +37,6 @@
     "underscore": "^1.8.3"
   },
   "devDependencies": {
-    "abacus-babel": "file:../babel",
     "abacus-eslint": "file:../eslint",
     "abacus-mocha": "file:../mocha"
   },
