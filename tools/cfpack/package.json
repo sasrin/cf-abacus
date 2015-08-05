@@ -1,11 +1,10 @@
 {
-  "name": "abacus-packapp",
-  "description": "Package an app and its local npm dependencies for deployment to Cloud Foundry",
+  "name": "abacus-cfpack",
+  "description": "CloudFoundry app package build script",
   "license": "Apache-2.0",
-  "readme": "README.md",
-  "version": "0.0.1-dev.1",
+  "version": "0.0.1-dev.2",
   "private": true,
-  "homepage": "https://github.com/cloudfoundry-incubator/cf-abacus",
+  "homepage": "https://github.com/cloudfoundry-incubator/cf-abacus/tools/cfpack",
   "bugs": {
     "url": "https://github.com/cloudfoundry-incubator/cf-abacus/issues"
   },
@@ -19,16 +18,15 @@
   ],
   "files": [
     ".npmrc",
-    "packapp",
-    "lib/",
+    "cfpack",
     "src/"
   ],
-  "main": "lib/index.js",
+  "main": "src/index.js",
   "bin": {
-    "packapp": "./packapp"
+    "cfpack": "./cfpack"
   },
   "scripts": {
-    "babel": "babel",
+    "babel": "true",
     "test": "eslint",
     "lint": "eslint",
     "pub": "publish"
@@ -37,7 +35,6 @@
     "underscore": "^1.8.3"
   },
   "devDependencies": {
-    "abacus-babel": "file:../babel",
     "abacus-eslint": "file:../eslint",
     "abacus-mocha": "file:../mocha",
     "abacus-publish": "file:../publish"

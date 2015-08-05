@@ -1,11 +1,10 @@
 {
   "name": "abacus-usage-reporting",
-  "description": "A simple reporting service for aggregated usage",
+  "description": "Usage reporting service",
   "license": "Apache-2.0",
-  "readme": "README.md",
-  "version": "0.0.1-dev.1",
+  "version": "0.0.1-dev.2",
   "private": true,
-  "homepage": "https://github.com/cloudfoundry-incubator/cf-abacus",
+  "homepage": "https://github.com/cloudfoundry-incubator/cf-abacus/lib/aggregation/reporting",
   "bugs": {
     "url": "https://github.com/cloudfoundry-incubator/cf-abacus/issues"
   },
@@ -31,7 +30,7 @@
     "test": "eslint && mocha",
     "lint": "eslint",
     "pub": "publish",
-    "cfpush": "../../../tools/packapp/packapp && cf push"
+    "cfpush": "cfpack && cf push"
   },
   "dependencies": {
     "babel-runtime": "^5.8.19",
@@ -54,9 +53,9 @@
   },
   "devDependencies": {
     "abacus-babel": "file:../../../tools/babel",
+    "abacus-cfpack": "file:../../../tools/cfpack",
     "abacus-eslint": "file:../../../tools/eslint",
     "abacus-mocha": "file:../../../tools/mocha",
-    "abacus-packapp": "file:../../../tools/packapp",
     "abacus-publish": "file:../../../tools/publish"
   },
   "engines": {

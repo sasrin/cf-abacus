@@ -1,11 +1,10 @@
 {
   "name": "abacus-provisioning-stub",
-  "description": "Stub for a provisioning service that works off a history of what has been provisioned over time",
+  "description": "Stub for a provisioning history service",
   "license": "Apache-2.0",
-  "readme": "README.md",
-  "version": "0.0.1-dev.1",
+  "version": "0.0.1-dev.2",
   "private": true,
-  "homepage": "https://github.com/cloudfoundry-incubator/cf-abacus",
+  "homepage": "https://github.com/cloudfoundry-incubator/cf-abacus/lib/stubs/provisioning",
   "bugs": {
     "url": "https://github.com/cloudfoundry-incubator/cf-abacus/issues"
   },
@@ -31,7 +30,7 @@
     "test": "eslint && mocha",
     "lint": "eslint",
     "pub": "publish",
-    "cfpush": "../../../tools/packapp/packapp && cf push"
+    "cfpush": "cfpack && cf push"
   },
   "dependencies": {
     "babel-runtime": "^5.8.19",
@@ -42,10 +41,10 @@
   },
   "devDependencies": {
     "abacus-babel": "file:../../../tools/babel",
+    "abacus-cfpack": "file:../../../tools/cfpack",
     "abacus-cluster": "file:../../utils/cluster",
     "abacus-eslint": "file:../../../tools/eslint",
     "abacus-mocha": "file:../../../tools/mocha",
-    "abacus-packapp": "file:../../../tools/packapp",
     "abacus-publish": "file:../../../tools/publish",
     "abacus-request": "file:../../utils/request"
   },

@@ -2,8 +2,7 @@
   "name": "cf-abacus",
   "description": "CF Abacus usage metering and aggregation service",
   "license": "Apache-2.0",
-  "readme": "README.md",
-  "version": "0.0.1-dev.1",
+  "version": "0.0.1-dev.2",
   "private": true,
   "homepage": "https://github.com/cloudfoundry-incubator/cf-abacus",
   "bugs": {
@@ -33,13 +32,13 @@
     "tools/"
   ],
   "scripts": {
-    "bootstrap": "etc/npm2 i etc && npm2 i tools/babel && npm2 i tools/eslint && npm2 i tools/mocha && npm2 i tools/publish",
+    "bootstrap": "etc/npm2 i etc && npm2 i tools/babel && npm2 i tools/eslint && npm2 i tools/mocha && npm2 i tools/publish && npm2 i tools/cfpack",
     "babel": "foreach abacus :path npm run babel",
     "build": "etc/versions && npm run bootstrap && npm run babel && npm2 install && npm test",
     "clean": "git clean -df",
     "rebuild": "npm run clean && npm run build",
     "lint": "foreach abacus node_modules/:name npm run lint",
-    "hint": "foreach abacus node_modules/:name jshint *.js test/*.js",
+    "hint": "foreach abacus node_modules/:name jshint src",
     "test": "foreach abacus node_modules/:name npm test && coverage",
     "coveralls": "cat .coverage/lcov.info | coveralls",
     "doc": "cat README.md | mddoc >README.html",
@@ -99,11 +98,11 @@
   },
   "devDependencies": {
     "abacus-babel": "file:tools/babel",
+    "abacus-cfpack": "file:tools/cfpack",
     "abacus-coverage": "file:tools/coverage",
     "abacus-eslint": "file:tools/eslint",
     "abacus-mddoc": "file:tools/mddoc",
     "abacus-mocha": "file:tools/mocha",
-    "abacus-packapp": "file:tools/packapp",
     "abacus-publish": "file:tools/publish",
     "coveralls": "^2.11.3",
     "jshint": "^2.8.0",
