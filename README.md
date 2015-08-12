@@ -3,7 +3,7 @@ CF-Abacus
 
 The Abacus usage metering and aggregation service.
 
-[![Build Status](https://travis-ci.org/sasrin/cf-abacus.svg)](https://travis-ci.org/sasrin/cf-abacus) [![Coverage Status](https://coveralls.io/repos/sasrin/cf-abacus/badge.svg?branch=dev&service=github)](https://coveralls.io/github/sasrin/cf-abacus?branch=dev)[![Dev Discussion](https://abacusdev-slack.mybluemix.net/badge.svg)](https://abacusdev-slack.mybluemix.net/)
+[![Build Status](https://travis-ci.org/sasrin/cf-abacus.svg)](https://travis-ci.org/sasrin/cf-abacus) [![Coverage Status](https://coveralls.io/repos/sasrin/cf-abacus/badge.svg?branch=dev&service=github)](https://coveralls.io/github/sasrin/cf-abacus?branch=dev) [![Slack Team](https://abacusdev-slack.mybluemix.net/badge.svg)](https://abacusdev-slack.mybluemix.net/) [![Gitter Chat](https://img.shields.io/badge/gitter-join%20chat-blue.svg)](https://gitter.im/cloudfoundry-incubator/cf-abacus?utm\_source=badge) [![IRC Chat](https://img.shields.io/badge/irc-%23abacusdev-blue.svg)](http://webchat.freenode.net?channels=%23abacusdev)
 
 Overview
 ---

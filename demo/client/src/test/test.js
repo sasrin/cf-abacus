@@ -125,6 +125,19 @@ describe('abacus-demo-client', () => {
           }, {
             unit: 'HEAVY_API_CALLS_PER_MONTH',
             quantity: 300
+          }],
+          plans: [{
+            id: 'plan_123',
+            aggregated_usage: [{
+              unit: 'STORAGE_PER_MONTH',
+              quantity: 1
+            }, {
+              unit: 'THOUSAND_LIGHT_API_CALLS_PER_MONTH',
+              quantity: 3
+            }, {
+              unit: 'HEAVY_API_CALLS_PER_MONTH',
+              quantity: 300
+            }]
           }]
         }],
         spaces: [{
@@ -140,6 +153,19 @@ describe('abacus-demo-client', () => {
             }, {
               unit: 'HEAVY_API_CALLS_PER_MONTH',
               quantity: 300
+            }],
+            plans: [{
+              id: 'plan_123',
+              aggregated_usage: [{
+                unit: 'STORAGE_PER_MONTH',
+                quantity: 1
+              }, {
+                unit: 'THOUSAND_LIGHT_API_CALLS_PER_MONTH',
+                quantity: 3
+              }, {
+                unit: 'HEAVY_API_CALLS_PER_MONTH',
+                quantity: 300
+              }]
             }]
           }],
           consumers: [{
@@ -155,6 +181,19 @@ describe('abacus-demo-client', () => {
               }, {
                 unit: 'HEAVY_API_CALLS_PER_MONTH',
                 quantity: 300
+              }],
+              plans: [{
+                id: 'plan_123',
+                aggregated_usage: [{
+                  unit: 'STORAGE_PER_MONTH',
+                  quantity: 1
+                }, {
+                  unit: 'THOUSAND_LIGHT_API_CALLS_PER_MONTH',
+                  quantity: 3
+                }, {
+                  unit: 'HEAVY_API_CALLS_PER_MONTH',
+                  quantity: 300
+                }]
               }]
             }]
           }]
@@ -197,8 +236,12 @@ describe('abacus-demo-client', () => {
       };
 
       // Format a date like expected by the reporting service
-      const day = (d) => util.format('%d-%d-%d', d.getUTCFullYear(),
-        d.getUTCMonth() + 1, d.getUTCDate());
+      const numFmt = (num, mask) => (mask + num).slice(-Math.max(mask.length,
+        (num + '').length));
+      const day = (d) => util.format('%s-%s-%s',
+        numFmt(d.getUTCFullYear(), '0000'),
+        numFmt(d.getUTCMonth() + 1, '00'),
+        numFmt(d.getUTCDate(), '00'));
 
       // Get a usage report for the test organization
       let gets = 0;
