@@ -19,6 +19,7 @@
   "files": [
     ".eslintrc",
     ".jshintrc",
+    ".jsinspectrc",
     ".npmrc",
     ".travis.yml",
     "LICENSE",
@@ -41,6 +42,7 @@
     "hint": "foreach abacus :path jshint src",
     "test": "foreach abacus node_modules/:name npm test && coverage",
     "coveralls": "cat .coverage/lcov.info | coveralls",
+    "dupcode": "jsinspect",
     "doc": "cat README.md | mddoc >README.html",
     "start": "bin/start",
     "stop": "bin/stop",
@@ -52,8 +54,9 @@
     "cfstop": "bin/cfstop"
   },
   "dependencies": {
-    "abacus-service-config": "file:lib/config/service",
+    "abacus-resource-config": "file:lib/config/resource",
     "abacus-price-config": "file:lib/config/price",
+    "abacus-usage-schemas": "file:lib/config/schemas",
     "abacus-usage-accumulator": "file:lib/aggregation/accumulator",
     "abacus-usage-aggregator": "file:lib/aggregation/aggregator",
     "abacus-instance-launcher": "file:lib/aggregation/launcher",
@@ -62,7 +65,6 @@
     "abacus-usage-collector": "file:lib/metering/collector",
     "abacus-usage-meter": "file:lib/metering/meter",
     "abacus-metering-db": "file:lib/metering/db",
-    "abacus-metering-schemas": "file:lib/metering/schemas",
     "abacus-usage-rate": "file:lib/rating/rate",
     "abacus-account-stub": "file:lib/stubs/account",
     "abacus-provisioning-stub": "file:lib/stubs/provisioning",
@@ -106,6 +108,7 @@
     "abacus-publish": "file:tools/publish",
     "coveralls": "^2.11.3",
     "jshint": "^2.8.0",
+    "jsinspect": "^0.6.1",
     "levelup": "~0.18.4",
     "pouchdb": "3.6.0"
   },
