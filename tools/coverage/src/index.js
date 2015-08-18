@@ -11,6 +11,7 @@ var fs = require('fs');
 var util = require('util');
 var tty = require('tty');
 var istanbul = require('istanbul');
+var commander = require('commander');
 
 var map = _.map;
 var filter = _.filter;
@@ -23,7 +24,6 @@ var flatten = _.flatten;
 var reduce = _.reduce;
 var identity = _.identity;
 var memoize = _.memoize;
-var contains = _.contains;
 
 /* eslint no-process-exit: 1 */
 
@@ -50,11 +50,11 @@ var sources = function(root, cov) {
 
     // Return a covered object with a relative path to the original source
     // of the covered file
-    var lib = path.join(sdir,
+    var rel = path.join(sdir,
       file[0].substr(mdir.length + 1)).split(':').reverse()[0].split('/');
-    var l = lib.lastIndexOf('lib');
-    var src =
-      lib.slice(0, l).concat(['src']).concat(lib.slice(l + 1)).join('/');
+    var l = rel.lastIndexOf('lib');
+    var src = (l === -1 ? rel :
+      rel.slice(0, l).concat(['src']).concat(rel.slice(l + 1))).join('/');
     return [src, extend(clone(file[1]), {
       path: src
     })];
@@ -131,15 +131,9 @@ var percentages = function(coverage) {
   };
 };
 
-// Colorify the report on a tty or when the command line says --colors,
-// or when env variable COVERAGE_COLORS is configured
-var colors = memoize(function() {
-  var enabled = function(c) {
-    return c !== undefined && c !== '0' && c !== 'false' && c !==
-      'disabled' && c !== 'no';
-  };
-  return tty.isatty(process.stdout) ||
-    contains(process.argv, '--colors') || enabled(process.env.COVERAGE_COLORS);
+// Colorify the report on a tty or when the command line says --colors
+var colors = memoize(function(opt) {
+  return tty.isatty(process.stdout) || opt.colors !== 'false';
 });
 
 // Report a failure and exit
@@ -150,6 +144,12 @@ var fail = function(msg) {
 
 // Report overall code coverage from Istanbul coverage files
 var runCLI = function() {
+  // Parse command line options
+  commander
+    .option(
+        '-c, --colors <value>', 'colorify output (true|false) [true]', 'true')
+    .parse(process.argv);
+
   // Load the root package.json from the current directory
   var root = JSON.parse(fs.readFileSync('package.json'));
 
@@ -170,9 +170,9 @@ var runCLI = function() {
 
       // Print overall code coverage percentages in green for 100%
       // coverage and red under 100%
-      var color = colors() ? fullcov ? '\u001b[32m' : '\u001b[31m' :
-        '';
-      var reset = colors() ? '\u001b[0m' : '';
+      var color = colors(commander) ? fullcov ?
+        '\u001b[32m' : '\u001b[31m' : '';
+      var reset = colors(commander) ? '\u001b[0m' : '';
       process.stdout.write(util.format(
         '\n%sOverall coverage lines %d\% statements %d\%%s\n\n',
         color, percent.l.toFixed(2), percent.s.toFixed(2), reset));
