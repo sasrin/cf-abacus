@@ -228,7 +228,7 @@ describe('abacus-perf-test', () => {
             o + 1, ri + 1, i + 1);
           cb(err, val);
         });
-    });
+    }, { name: 'Post Usage' });
 
     // Post the requested number of usage docs
     let posts = 0;
