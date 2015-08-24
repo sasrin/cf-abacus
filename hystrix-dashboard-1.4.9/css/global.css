@@ -29,6 +29,22 @@ img {
 	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
 }
 
+#header1 {
+  height: 65px;
+  margin-bottom: 5px;
+}
+
+#header1 h2 {
+  float:left;
+  color: black;
+  position:relative;
+  padding-left: 20px;
+  top: 26px;
+  font-size: 20px;
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+}
+
+
 #header .header_nav {
 	position:absolute;
 	top:48px;
