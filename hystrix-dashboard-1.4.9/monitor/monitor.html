@@ -62,7 +62,7 @@
 
       var dependencies = 'dependencies' + i;
       var title_name = 'title_name' + i;
-      var hystrixMonitor = new HystrixCommandMonitor(dependencies, {includeDetailIcon:false});
+      var hystrixMonitor = new HystrixCommandMonitor(i, dependencies, {includeDetailIcon:false});
 
       if(s != undefined) {
         var origin = s.stream;
