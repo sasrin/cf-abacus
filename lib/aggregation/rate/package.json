@@ -34,6 +34,7 @@
     "babel-runtime": "^5.8.19",
     "abacus-aggregation-db": "file:../../aggregation/db",
     "abacus-batch": "file:../../utils/batch",
+    "abacus-throttle": "file:../../utils/throttle",
     "abacus-breaker": "file:../../utils/breaker",
     "abacus-dbclient": "file:../../utils/dbclient",
     "abacus-debug": "file:../../utils/debug",

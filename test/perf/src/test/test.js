@@ -256,6 +256,15 @@ describe('abacus-perf-test', () => {
     // Format a date like expected by the reporting service
     const day = (d) => util.format('%d-%d-%d',
       d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate());
+    const refreshAfter = (() => {
+      // 100 submissions per second == 1/10 submissions per msec
+      // - so # of msec = # of submissions * 10
+      const needed = orgs * resourceInstances * usage * 10;
+      const extra = 120000;
+      const total = needed + extra;
+      return Math.max(total, extra) > extra ? 60000 : 250;
+    })();
+
 
     // Get a usage report for the test organization
     let gets = 0;
@@ -278,10 +287,13 @@ describe('abacus-perf-test', () => {
           catch (e) {
             // If the comparison fails we'll be called again to retry
             // after 250 msec, but give up after the computed timeout
-            if(++gets === timeout * Math.max(1, orgs / 4) / 250) throw e;
+            if(++gets === timeout * Math.max(1, orgs / 4) / refreshAfter)
+              throw e;
           }
         });
     };
+
+
 
     // Wait for the expected usage report for all organizations, get an
     // organization usage report every 250 msec until we get the expected
@@ -292,7 +304,8 @@ describe('abacus-perf-test', () => {
       const cb = () => { if(++verified === orgs) done(); };
 
       map(range(orgs), (o) => {
-        const i = setInterval(() => get(o, () => cb(clearInterval(i))), 250);
+        const i = setInterval(() => get(o, () => cb(clearInterval(i))),
+          refreshAfter);
       });
     };
 

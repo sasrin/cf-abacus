@@ -24,7 +24,7 @@
   "main": "lib/index.js",
   "scripts": {
     "babel": "babel",
-    "test": "eslint && mocha",
+    "test": "eslint",
     "lint": "eslint",
     "pub": "publish"
   },
