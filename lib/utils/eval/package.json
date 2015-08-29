@@ -1,13 +1,16 @@
 {
-  "name": "abacus-cfoauth",
-  "description": "Simplify getting OAuth token using client credentials",
+  "name": "abacus-eval",
+  "description": "Evaluate a Javascript expression",
   "license": "Apache-2.0",
-  "version": "0.0.1-dev.1",
+  "version": "0.0.1-dev.2",
   "private": true,
-  "readme": "README.md",
+  "homepage": "https://github.com/cloudfoundry-incubator/cf-abacus/lib/utils/eval",
+  "bugs": {
+    "url": "https://github.com/cloudfoundry-incubator/cf-abacus/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/piotrprzybylski/cf-abacus.git"
+    "url": "http://github.com/cloudfoundry-incubator/cf-abacus.git"
   },
   "keywords": [
     "cf",
@@ -26,17 +29,10 @@
     "pub": "publish"
   },
   "dependencies": {
-    "abacus-debug": "^0.0.1-dev",
-    "abacus-request": "^0.0.1-dev",
-    "abacus-retry": "^0.0.1-dev",
-    "underscore": "^1.8.3",
-    "chai": "^3.0.0",
-    "co": "^3.0.6",
-    "jsonwebtoken": "^5.0.5"
+    "abacus-debug": "file:../debug",
+    "babel-core": "^5.8.19"
   },
   "devDependencies": {
-    "babel-runtime": "^5.8.19",
-    "abacus-express": "^0.0.1-dev",
     "abacus-babel": "file:../../../tools/babel",
     "abacus-eslint": "file:../../../tools/eslint",
     "abacus-mocha": "file:../../../tools/mocha",
