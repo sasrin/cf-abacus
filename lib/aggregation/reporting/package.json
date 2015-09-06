@@ -2,7 +2,7 @@
   "name": "abacus-usage-reporting",
   "description": "Usage reporting service",
   "license": "Apache-2.0",
-  "version": "0.0.1-dev.2",
+  "version": "0.0.1-dev.3",
   "private": true,
   "homepage": "https://github.com/cloudfoundry-incubator/cf-abacus/lib/aggregation/reporting",
   "bugs": {
@@ -42,13 +42,15 @@
     "abacus-debug": "file:../../utils/debug",
     "abacus-request": "file:../../utils/request",
     "abacus-retry": "file:../../utils/retry",
+    "abacus-resource-config": "file:../../config/resource",
     "abacus-router": "file:../../utils/router",
+    "abacus-schema": "file:../../utils/schema",
     "abacus-throttle": "file:../../utils/throttle",
     "abacus-transform": "file:../../utils/transform",
     "abacus-urienv": "file:../../utils/urienv",
+    "abacus-usage-schemas": "file:../../config/schemas",
     "abacus-webapp": "file:../../utils/webapp",
     "abacus-yieldable": "file:../../utils/yieldable",
-    "graphql": "^0.1.2",
     "underscore": "^1.8.3"
   },
   "devDependencies": {
