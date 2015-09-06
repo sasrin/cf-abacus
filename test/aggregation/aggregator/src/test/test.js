@@ -124,7 +124,7 @@ describe('abacus-usage-aggregator-itest', () => {
       o + 1].join('-');
     const rid = (o) => o % 2 === 0 ? 'us-south' : 'eu-gb';
     const sid = (o, ri) => ['aaeae239-f3f8-483c-9dd0-de5d41c38b6a',
-      o + 1].join('-');
+      o + 1, ri % 2 === 0 ? 1 : 2].join('-');
     const cid = (o, ri) => ['bbeae239-f3f8-483c-9dd0-de6781c38bab',
       o + 1].join('-');
     const pid = (ri, u) => 'basic';
@@ -177,6 +177,82 @@ describe('abacus-usage-aggregator-itest', () => {
       aggregated_usage: aggregated(o, ri, u)
     }];
 
+
+
+
+    // Aggregated usage
+    const saggregated = (o, ri, u, s) => [
+      { metric: 'storage',
+        quantity: ri < resourceInstances && u === 0 ?
+        Math.round((ri + 1) / 2 + ((ri % 2 === 0 && s === 1) ? -0.1 : 0.1)) : Math.round(resourceInstances / 2 + ((s === 1) ? -0.1 : 0.1)) },
+      { metric: 'thousand_light_api_calls',
+        quantity: Math.round((ri + 1) / 2 + ((ri % 2 === 0 && s === 1) ? -0.1 : 0.1)) + u * Math.round(resourceInstances / 2 + ((s === 1) ? -0.1 : 0.1)) },
+      { metric: 'heavy_api_calls',
+        quantity: 100 * (Math.round((ri + 1) / 2 + ((ri % 2 === 0 && s === 1) ? -0.1 : 0.1)) + u * Math.round(resourceInstances / 2 + ((s === 1) ? -0.1 : 0.1))) }
+    ];
+
+//    console.log('first', saggregated(0, 0, 1, 0));
+
+
+    // Plan aggregated usage
+    const psaggregated = (o, ri, u, s) => [{
+      plan_id: pid(ri + s, u),
+      aggregated_usage: saggregated(o, ri, u, s)
+    }];
+
+    const sagg = (o, ri, u) => {
+      if (ri === 0 && (resourceInstances === 1 || u === 0)) {
+        return [{
+          space_id: sid(o, ri),
+          resources: [{
+            resource_id: 'object-storage',
+            aggregated_usage: aggregated(o, ri, u),
+            plans: paggregated(o, ri, u)
+          }],
+          consumers: [{
+            consumer_id: cid(o, ri),
+            resources: [{
+              resource_id: 'object-storage',
+              aggregated_usage: aggregated(o, ri, u),
+              plans: paggregated(o, ri, u)
+            }]
+          }]
+        }];
+      }
+      
+      return [{
+        space_id: sid(o, 0),
+        resources: [{
+          resource_id: 'object-storage',
+          aggregated_usage: saggregated(o, ri, u, 0),
+          plans: psaggregated(o, ri, u, 0)
+        }],
+        consumers: [{
+          consumer_id: cid(o, 0),
+          resources: [{
+            resource_id: 'object-storage',
+            aggregated_usage: saggregated(o, ri, u, 0),
+            plans: psaggregated(o, ri, u, 0)
+          }]
+        }]
+      }, {
+        space_id: sid(o, 1),
+        resources: [{
+          resource_id: 'object-storage',
+          aggregated_usage: saggregated(o, ri, u, 1),
+          plans: psaggregated(o, ri, u, 1)
+        }],
+        consumers: [{
+          consumer_id: cid(o, 1),
+          resources: [{
+            resource_id: 'object-storage',
+            aggregated_usage: saggregated(o, ri, u, 1),
+            plans: psaggregated(o, ri, u, 1)
+          }]
+        }]
+      }];
+    }
+
     // Aggregated usage for a given org, resource instance, usage #s
     const aggregatedTemplate = (o, ri, u) => ({
       accumulated_usage_id: uid(o, ri, u),
@@ -188,22 +264,7 @@ describe('abacus-usage-aggregator-itest', () => {
         aggregated_usage: aggregated(o, ri, u),
         plans: paggregated(o, ri, u)
       }],
-      spaces: [{
-        space_id: sid(o, ri),
-        resources: [{
-          resource_id: 'object-storage',
-          aggregated_usage: aggregated(o, ri, u),
-          plans: paggregated(o, ri, u)
-        }],
-        consumers: [{
-          consumer_id: cid(o, ri),
-          resources: [{
-            resource_id: 'object-storage',
-            aggregated_usage: aggregated(o, ri, u),
-            plans: paggregated(o, ri, u)
-          }]
-        }]
-      }]
+      spaces: sagg(o, ri, u)
     });
 
     // Post an accumulated usage doc, throttled to default concurrent requests
@@ -226,6 +287,10 @@ describe('abacus-usage-aggregator-itest', () => {
 
             expect(err).to.equal(undefined);
             expect(val.statusCode).to.equal(200);
+
+
+            console.log('aggregated: ', require('util').inspect(val.body, { depth: null }));
+            console.log('expected: ', require('util').inspect(aggregatedTemplate(o, ri, u), { depth: null }));
 
             expect(omit(val.body, ['id'])).to.deep
               .equal(aggregatedTemplate(o, ri, u));
