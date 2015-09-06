@@ -126,8 +126,8 @@ describe('abacus-usage-aggregator-itest', () => {
     const sid = (o, ri) => ['aaeae239-f3f8-483c-9dd0-de5d41c38b6a',
       o + 1, ri % 2 === 0 ? 1 : 2].join('-');
     const cid = (o, ri) => ['bbeae239-f3f8-483c-9dd0-de6781c38bab',
-      o + 1].join('-');
-    const pid = (ri, u) => 'basic';
+      o + 1, ri % 2 === 0 ? 1 : 2, ri % 8 < 4 ? 1 : 2].join('-');
+    const pid = (ri) => ri % 4 < 2 ? 'basic' : 'advanced';
 
     const riid = (o, ri) => ['0b39fa70-a65f-4183-bae8-385633ca5c87',
       o + 1, ri + 1].join('-');
@@ -178,27 +178,61 @@ describe('abacus-usage-aggregator-itest', () => {
     }];
 
 
-
-
     // Aggregated usage
+
+     // Aggregated usage
+     const saggregated0 = (o, ri, u, s) => [
+       { metric: 'storage',
+         quantity: ri < resourceInstances && u === 0 ?
+        Math.round((ri + 1) / 2 + ((ri % 2 === 0 && s === 1) ? -0.1 : 0.1)) : Math.round(resourceInstances / 2 + ((s === 1) ? -0.1 : 0.1)) },
+       { metric: 'thousand_light_api_calls',
+        quantity: Math.round((ri + 1) / 2 + ((ri % 2 === 0 && s === 1) ? -0.1 : 0.1)) + u * Math.round(resourceInstances / 2 + ((s === 1) ? -0.1 : 0.1)) },
+       { metric: 'heavy_api_calls',
+        quantity: 100 * (Math.round((ri + 1) / 2 + ((ri % 2 === 0 && s === 1) ? -0.1 : 0.1)) + u * Math.round(resourceInstances / 2 + ((s === 1) ? -0.1 : 0.1))) }
+     ];
+
+
     const saggregated = (o, ri, u, s) => [
       { metric: 'storage',
         quantity: ri < resourceInstances && u === 0 ?
-        Math.round((ri + 1) / 2 + ((ri % 2 === 0 && s === 1) ? -0.1 : 0.1)) : Math.round(resourceInstances / 2 + ((s === 1) ? -0.1 : 0.1)) },
+        Math.round((ri + 1) / 4 + ((ri % 4 < 2 && s === 1) ? -0.3 : 0.3)) : Math.round(resourceInstances / 4 + ((s === 1) ? -0.3 : 0.3)) },
       { metric: 'thousand_light_api_calls',
-        quantity: Math.round((ri + 1) / 2 + ((ri % 2 === 0 && s === 1) ? -0.1 : 0.1)) + u * Math.round(resourceInstances / 2 + ((s === 1) ? -0.1 : 0.1)) },
+        quantity: Math.round((ri + 1) / 4 + ((ri % 4 < 2 && s === 1) ? -0.3 : 0.3)) + u * Math.round(resourceInstances / 4 + ((s === 3) ? -0.3 : 0.3)) },
       { metric: 'heavy_api_calls',
-        quantity: 100 * (Math.round((ri + 1) / 2 + ((ri % 2 === 0 && s === 1) ? -0.1 : 0.1)) + u * Math.round(resourceInstances / 2 + ((s === 1) ? -0.1 : 0.1))) }
+        quantity: 100 * (Math.round((ri + 1) / 4 + ((ri % 4 < 2 && s === 1) ? -0.3 : 0.3)) + u * Math.round(resourceInstances / 4 + ((s === 3) ? -0.3 : 0.3))) }
     ];
 
-//    console.log('first', saggregated(0, 0, 1, 0));
-
-
+/*    console.log('first', saggregated(0, 0, 0, 0));
+    console.log('first', saggregated(0, 0, 0, 1));
+    console.log('first', saggregated(0, 1, 0, 0));
+    console.log('first', saggregated(0, 1, 0, 1));
+    console.log('first', saggregated(0, 2, 0, 0));
+    console.log('first', saggregated(0, 2, 0, 1));
+    console.log('first', saggregated(0, 3, 0, 0));
+    console.log('first', saggregated(0, 3, 0, 1));
+    console.log('first', saggregated(0, 4, 0, 0));
+    console.log('first', saggregated(0, 4, 0, 1));
+    console.log('first', saggregated(0, 5, 0, 0));
+    console.log('first', saggregated(0, 5, 0, 1));
+    return;
+*/
     // Plan aggregated usage
-    const psaggregated = (o, ri, u, s) => [{
-      plan_id: pid(ri + s, u),
-      aggregated_usage: saggregated(o, ri, u, s)
-    }];
+    const psaggregated = (o, ri, u, s) => {
+      if (ri < 2 && (resourceInstances === 2 || u === 0)) {
+        return [{
+          plan_id: pid(ri, u),
+          aggregated_usage: saggregated0(o, ri, u, s)
+        }];
+      }
+
+      return [{
+          plan_id: pid(0),
+          aggregated_usage: saggregated(o, ri, u, 0)
+        },{
+          plan_id: pid(2),
+          aggregated_usage: saggregated(o, ri, u, 1)
+        }];
+    };
 
     const sagg = (o, ri, u) => {
       if (ri === 0 && (resourceInstances === 1 || u === 0)) {
@@ -206,15 +240,15 @@ describe('abacus-usage-aggregator-itest', () => {
           space_id: sid(o, ri),
           resources: [{
             resource_id: 'object-storage',
-            aggregated_usage: aggregated(o, ri, u),
-            plans: paggregated(o, ri, u)
+            aggregated_usage: saggregated0(o, ri, u),
+            plans: psaggregated(o, ri, u)
           }],
           consumers: [{
             consumer_id: cid(o, ri),
             resources: [{
               resource_id: 'object-storage',
-              aggregated_usage: aggregated(o, ri, u),
-              plans: paggregated(o, ri, u)
+              aggregated_usage: saggregated0(o, ri, u),
+              plans: psaggregated(o, ri, u)
             }]
           }]
         }];
@@ -224,7 +258,7 @@ describe('abacus-usage-aggregator-itest', () => {
         space_id: sid(o, 0),
         resources: [{
           resource_id: 'object-storage',
-          aggregated_usage: saggregated(o, ri, u, 0),
+          aggregated_usage: saggregated0(o, ri, u, 0),
           plans: psaggregated(o, ri, u, 0)
         }],
         consumers: [{
@@ -239,14 +273,14 @@ describe('abacus-usage-aggregator-itest', () => {
         space_id: sid(o, 1),
         resources: [{
           resource_id: 'object-storage',
-          aggregated_usage: saggregated(o, ri, u, 1),
+          aggregated_usage: saggregated0(o, ri, u, 1),
           plans: psaggregated(o, ri, u, 1)
         }],
         consumers: [{
           consumer_id: cid(o, 1),
           resources: [{
             resource_id: 'object-storage',
-            aggregated_usage: saggregated(o, ri, u, 1),
+            aggregated_usage: saggregated0(o, ri, u, 1),
             plans: psaggregated(o, ri, u, 1)
           }]
         }]
