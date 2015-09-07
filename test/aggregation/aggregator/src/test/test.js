@@ -170,6 +170,7 @@ describe('abacus-usage-aggregator-itest', () => {
         quantity: 100 * (ri + 1 + u * resourceInstances) }
     ];
 
+    // 0, 0, 1, 2, 2, 2, 3, 4, 4, 4, 5, 6, 6, 6, 7, 8, 8, 8, ...........
     const copa = (ri) => Math.round(ri / 2 + (((ri % 2 === 0) ? 0 : 0.5) * ((ri / 2  - 0.5) % 2 === 0 ? -1 : 1)));
 
     const opa = (o, ri, u, p) => [
@@ -199,42 +200,46 @@ describe('abacus-usage-aggregator-itest', () => {
       }];
     };
 
-    const sa = (o, ri, u) => [
+    // 0, 1, 1, 2, 2, 3, 3, 4, 4,.....
+    const csa = (ri) => Math.round(ri / 2);
+
+    const sa = (o, ri, u, s) => [
       { metric: 'storage',
-        quantity: ri < resourceInstances && u === 0 ?
-        ri + 1 : resourceInstances },
+        quantity: (ri - (s === 0 ? 1 : 0) < resourceInstances && u === 0) ?
+        csa(ri) : csa(resourceInstances - (s === 0 ? 0 : 1)) },
       { metric: 'thousand_light_api_calls',
-        quantity: ri + 1 + u * resourceInstances },
+        quantity: csa(ri) + u * csa(resourceInstances - (s === 0 ? 0 : 1)) },
       { metric: 'heavy_api_calls',
-        quantity: 100 * (ri + 1 + u * resourceInstances) }
+        quantity: 100 * (csa(ri) + u * csa(resourceInstances - (s === 0 ? 0 : 1))) }
     ];
 
-    const cspa = (ri) => Math.round(ri / 2 + (((ri % 2 === 0) ? 0 : 0.5) * ((ri / 2  - 0.5) % 2 === 0 ? -1 : 1)));
+    // 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, ......
+    const cspa = (ri) => Math.round(ri / 4 - 0.25);
 
-    const spa = (o, ri, u, p) => [
+    const spa = (o, ri, u, s, p) => [
        { metric: 'storage',
-         quantity: (ri - (p === 0 ? 2 : 0)) < resourceInstances && u === 0 ?
-        copa(ri) : copa(resourceInstances + (p === 0 ? 1 : -1)) },
+         quantity: (ri - ((s === 0) ?  3 : 2)) < resourceInstances && u === 0 ?
+        cspa(ri) : cspa(resourceInstances + ((s === 0) ? (p === 0 ? 2 : 0) : (p === 0 ? 1 : -1))) },
        { metric: 'thousand_light_api_calls',
-        quantity: copa(ri) + u * copa(resourceInstances + (p === 0 ? 1 : -1)) },
+        quantity: cspa(ri) + u * cspa(resourceInstances + ((s === 0) ? (p === 0 ? 2 : 0) : (p === 0 ? 1 : -1))) },
        { metric: 'heavy_api_calls',
-        quantity: 100 * (copa(ri) + u * copa(resourceInstances + (p === 0 ? 1 : -1))) }
+        quantity: 100 * (cspa(ri) + u * cspa(resourceInstances + ((s === 0) ? (p === 0 ? 2 : 0) : (p === 0 ? 1 : -1)))) }
      ];
 
-    const spagg = (o, ri, u) => {
-      if (ri < 2 && (resourceInstances <= 2 || u == 0)) {
+    const spagg = (o, ri, u, s) => {
+      if (ri < (2 + s) && (resourceInstances <= (2 + s) || u == 0)) {
         return [{
           plan_id: pid(0),
-          aggregated_usage: opa(o, ri + 2, u, 0)
+          aggregated_usage: spa(o, ri + (s === 0 ? 3 : 2), u, s, 0)
         }];
       }
 
       return [{
         plan_id: pid(0),
-        aggregated_usage: opa(o, ri + 2, u, 0)
+        aggregated_usage: spa(o, ri + (s === 0 ? 3 : 2), u, s, 0)
       }, {
         plan_id: pid(2),
-        aggregated_usage: opa(o, ri, u, 1)
+        aggregated_usage: spa(o, ri + (s === 0 ? 1 : 0), u, s, 1)
       }];
     };
 
@@ -242,18 +247,18 @@ describe('abacus-usage-aggregator-itest', () => {
     const sagg = (o, ri, u) => {
       if (ri === 0 && (resourceInstances === 1 || u === 0)) {
         return [{
-          space_id: sid(o, ri),
+          space_id: sid(o, 0),
           resources: [{
             resource_id: 'object-storage',
-            aggregated_usage: sa(o, ri, u),
-            plans: psagg(o, ri, u)
+            aggregated_usage: sa(o, ri + 1, u, 0),
+            plans: spagg(o, ri, u, 0)
           }],
           consumers: [{
-            consumer_id: cid(o, ri),
+            consumer_id: cid(o, 0),
             resources: [{
               resource_id: 'object-storage',
-              aggregated_usage: sa(o, ri, u),
-              plans: psagg(o, ri, u)
+              aggregated_usage: sa(o, ri + 1, u, 0),
+              plans: spagg(o, ri, u, 0)
             }]
           }]
         }];
@@ -263,30 +268,30 @@ describe('abacus-usage-aggregator-itest', () => {
         space_id: sid(o, 0),
         resources: [{
           resource_id: 'object-storage',
-          aggregated_usage: saggregated0(o, ri, u, 0),
-          plans: psaggregated(o, ri, u, 0)
+          aggregated_usage: sa(o, ri + 1, u, 0),
+          plans: spagg(o, ri, u, 0)
         }],
         consumers: [{
           consumer_id: cid(o, 0),
           resources: [{
             resource_id: 'object-storage',
-            aggregated_usage: saggregated(o, ri, u, 0),
-            plans: psaggregated(o, ri, u, 0)
+            aggregated_usage: sa(o, ri + 1, u, 0),
+            plans: spagg(o, ri, u, 0)
           }]
         }]
       }, {
         space_id: sid(o, 1),
         resources: [{
           resource_id: 'object-storage',
-          aggregated_usage: saggregated0(o, ri, u, 1),
-          plans: psaggregated(o, ri, u, 1)
+          aggregated_usage: sa(o, ri, u, 1),
+          plans: spagg(o, ri, u, 1)
         }],
         consumers: [{
           consumer_id: cid(o, 1),
           resources: [{
             resource_id: 'object-storage',
-            aggregated_usage: saggregated0(o, ri, u, 1),
-            plans: psaggregated(o, ri, u, 1)
+            aggregated_usage: sa(o, ri, u, 1),
+            plans: spagg(o, ri, u, 1)
           }]
         }]
       }];
@@ -303,7 +308,7 @@ describe('abacus-usage-aggregator-itest', () => {
         aggregated_usage: oa(o, ri, u),
         plans: opagg(o, ri, u)
       }],
-//      spaces: sagg(o, ri, u)
+      spaces: sagg(o, ri, u)
     });
 
     // Post an accumulated usage doc, throttled to default concurrent requests
@@ -332,7 +337,7 @@ describe('abacus-usage-aggregator-itest', () => {
             console.log('aggregated: ', require('util').inspect(val.body, { depth: null }));
             console.log('expected: ', require('util').inspect(aggregatedTemplate(o, ri, u), { depth: null }));
 
-            expect(omit(val.body, ['id', 'spaces'])).to.deep
+            expect(omit(val.body, ['id'])).to.deep
               .equal(aggregatedTemplate(o, ri, u));
 
             debug('Verified aggregated usage for org%d instance%d usage%d',
