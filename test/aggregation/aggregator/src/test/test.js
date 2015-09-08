@@ -162,7 +162,7 @@ describe('abacus-usage-aggregator-itest', () => {
 
     const oa = (o, ri, u) => [
       { metric: 'storage',
-        quantity: ri < resourceInstances && u === 0 ?
+        quantity: u === 0 ?
         ri + 1 : resourceInstances },
       { metric: 'thousand_light_api_calls',
         quantity: ri + 1 + u * resourceInstances },
@@ -175,7 +175,7 @@ describe('abacus-usage-aggregator-itest', () => {
 
     const opa = (o, ri, u, p) => [
        { metric: 'storage',
-         quantity: (ri - (p === 0 ? 2 : 0)) < resourceInstances && u === 0 ?
+         quantity: u === 0 ?
         copa(ri) : copa(resourceInstances + (p === 0 ? 1 : -1)) },
        { metric: 'thousand_light_api_calls',
         quantity: copa(ri) + u * copa(resourceInstances + (p === 0 ? 1 : -1)) },
@@ -205,7 +205,7 @@ describe('abacus-usage-aggregator-itest', () => {
 
     const sa = (o, ri, u, s) => [
       { metric: 'storage',
-        quantity: (ri - (s === 0 ? 1 : 0) < resourceInstances && u === 0) ?
+        quantity: u === 0 ?
         csa(ri) : csa(resourceInstances - (s === 0 ? 0 : 1)) },
       { metric: 'thousand_light_api_calls',
         quantity: csa(ri) + u * csa(resourceInstances - (s === 0 ? 0 : 1)) },
@@ -218,7 +218,7 @@ describe('abacus-usage-aggregator-itest', () => {
 
     const spa = (o, ri, u, s, p) => [
        { metric: 'storage',
-         quantity: (ri - ((s === 0) ?  3 : 2)) < resourceInstances && u === 0 ?
+         quantity: u === 0 ?
         cspa(ri) : cspa(resourceInstances + ((s === 0) ? (p === 0 ? 2 : 0) : (p === 0 ? 1 : -1))) },
        { metric: 'thousand_light_api_calls',
         quantity: cspa(ri) + u * cspa(resourceInstances + ((s === 0) ? (p === 0 ? 2 : 0) : (p === 0 ? 1 : -1))) },
@@ -269,84 +269,40 @@ describe('abacus-usage-aggregator-itest', () => {
         quantity: 100 * (ccpa(ri) + u * ccpa(resourceInstances - 1 + ((s === 0) ? ((c === 0) ? (p === 0 ? 8 : 6) : (p === 0 ? 4 : 2)) : ((c === 0) ? (p === 0 ? 7 : 5) : (p === 0 ? 3 : 1))))) }
      ];
 
-    const cpagg = (o, ri, u, s, c) => {
-      if (ri < (c === 0 ? (2 + s) : (6 + s)) && (resourceInstances <= (c === 0 ? (2 + s) : (6 + s)) || u === 0)) {
-        return [{
-          plan_id: pid(0),
-          aggregated_usage: cpa(o, ri + (s=== 0 ? (c === 0 ? 8 : 4) : (c === 0 ? 7 : 3)), u, s, c, 0)
-        }];
-      }
+    // Total resource instances index
+    const tri = () => resourceInstances - 1;
+    const create = (p, c) => map(range(p() ? 1 : 2), (i) => c(i));
 
-      return [{
-        plan_id: pid(0),
-        aggregated_usage: cpa(o, ri + (s=== 0 ? (c === 0 ? 8 : 4) : (c === 0 ? 7 : 3)), u, s, c, 0)
-      }, {
-        plan_id: pid(2),
-        aggregated_usage: cpa(o, ri + (s=== 0 ? (c === 0 ? 6 : 2) : (c === 0 ? 5 : 1)), u, s, c, 1)
-      }];
-    };
+    const scpagg = (o, ri, u, s, c) =>
+      create(() => (tri < (c === 0 ? (2 + s) : (6 + s)) ||
+        ((ri < (c === 0 ? (2 + s) : (6 + s))) && u === 0)), (i) => ({
+          plan_id: pid(i === 0 ? 0 : 2),
+          aggregated_usage: cpa(o, ri + ((i === 0) ?
+            (s=== 0 ? (c === 0 ? 8 : 4) : (c === 0 ? 7 : 3)) :
+            (s=== 0 ? (c === 0 ? 6 : 2) : (c === 0 ? 5 : 1))), u, s, c, i),
+        }));
 
-    const cagg = (o, ri, u, s) => {
-      if ( ri < (4 + s) && (resourceInstances <= (4 + s) || u === 0)) {
-        return [{
-          consumer_id: cid(o, s),
-          resources: [{
-            resource_id: 'object-storage',
-            aggregated_usage: ca(o, ri + (s === 0 ? 6 : 5), u, s, 0),
-            plans: cpagg(o, ri, u, s, 0)
-          }]
-        }];
-      }
-
-      return [{
-        consumer_id: cid(o, s === 0 ? 0 : 1 ),
+    const scagg = (o, ri, u, s) =>
+      create(() => (tri < (4 + s)) || (ri < (4 + s) && u === 0), (i) => ({
+        consumer_id: cid(o, (i === 0) ? s : (s === 0 ? 4 : 5)),
         resources: [{
           resource_id: 'object-storage',
-          aggregated_usage: ca(o, ri + (s === 0 ? 6 : 5), u, s, 0),
-          plans: cpagg(o, ri, u, s, 0)
+          aggregated_usage: ca(o, ri + ((i === 0) ?
+            (s === 0 ? 6 : 5) : (s === 0 ? 2 : 1)), u, s, i),
+          plans: scpagg(o, ri, u, s, i)
         }]
-      }, {
-        consumer_id: cid(o, s === 0 ? 4 : 5),
-        resources: [{
-          resource_id: 'object-storage',
-          aggregated_usage: ca(o, ri + (s === 0 ? 2 : 1), u, s, 1),
-          plans: cpagg(o, ri, u, s, 1)
-        }]
-      }];
-    };
+      }));
 
-    const sagg = (o, ri, u) => {
-      if (ri === 0 && (resourceInstances === 1 || u === 0)) {
-        return [{
-          space_id: sid(o, 0),
-          resources: [{
-            resource_id: 'object-storage',
-            aggregated_usage: sa(o, ri + 1, u, 0),
-            plans: spagg(o, ri, u, 0)
-          }],
-          consumers: cagg(o, ri, u, 0)
-        }];
-      }
-      
-      return [{
-        space_id: sid(o, 0),
+    const osagg = (o, ri, u) =>
+      create(() => tri === 0 || (ri === 0 &&  u === 0), (i) => ({
+        space_id: sid(o, i),
         resources: [{
           resource_id: 'object-storage',
-          aggregated_usage: sa(o, ri + 1, u, 0),
-          plans: spagg(o, ri, u, 0)
+          aggregated_usage: sa(o, ri + (i === 0 ? 1 : 0), u, i),
+          plans: spagg(o, ri, u, i)
         }],
-        consumers: cagg(o, ri, u,  0)
-      }, {
-        space_id: sid(o, 1),
-        resources: [{
-          resource_id: 'object-storage',
-          aggregated_usage: sa(o, ri, u, 1),
-          plans: spagg(o, ri, u, 1)
-        }],
-        consumers: cagg(o, ri, u, 1)
-
-      }];
-    }
+        consumers: scagg(o, ri, u, i)
+      }));
 
     // Aggregated usage for a given org, resource instance, usage #s
     const aggregatedTemplate = (o, ri, u) => ({
@@ -359,7 +315,7 @@ describe('abacus-usage-aggregator-itest', () => {
         aggregated_usage: oa(o, ri, u),
         plans: opagg(o, ri, u)
       }],
-      spaces: sagg(o, ri, u)
+      spaces: osagg(o, ri, u)
     });
 
     // Post an accumulated usage doc, throttled to default concurrent requests
