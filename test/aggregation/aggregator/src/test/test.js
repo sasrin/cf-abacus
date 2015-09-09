@@ -160,149 +160,97 @@ describe('abacus-usage-aggregator-itest', () => {
       ]
     });
 
-    const oa = (o, ri, u) => [
-      { metric: 'storage',
-        quantity: u === 0 ?
-        ri + 1 : resourceInstances },
-      { metric: 'thousand_light_api_calls',
-        quantity: ri + 1 + u * resourceInstances },
-      { metric: 'heavy_api_calls',
-        quantity: 100 * (ri + 1 + u * resourceInstances) }
-    ];
-
-    // 0, 0, 1, 2, 2, 2, 3, 4, 4, 4, 5, 6, 6, 6, 7, 8, 8, 8, ...........
-    const copa = (ri) => Math.round(ri / 2 + (((ri % 2 === 0) ? 0 : 0.5) * ((ri / 2  - 0.5) % 2 === 0 ? -1 : 1)));
-
-    const opa = (o, ri, u, p) => [
-       { metric: 'storage',
-         quantity: u === 0 ?
-        copa(ri) : copa(resourceInstances + (p === 0 ? 1 : -1)) },
-       { metric: 'thousand_light_api_calls',
-        quantity: copa(ri) + u * copa(resourceInstances + (p === 0 ? 1 : -1)) },
-       { metric: 'heavy_api_calls',
-        quantity: 100 * (copa(ri) + u * copa(resourceInstances + (p === 0 ? 1 : -1))) }
-     ];
-
-    const opagg = (o, ri, u) => {
-      if (ri < 2 && (resourceInstances <= 2 || u == 0)) {
-        return [{
-          plan_id: pid(0),
-          aggregated_usage: opa(o, ri + 2, u, 0)
-        }];
-      }
-
-      return [{
-        plan_id: pid(0),
-        aggregated_usage: opa(o, ri + 2, u, 0)
-      }, {
-        plan_id: pid(2),
-        aggregated_usage: opa(o, ri, u, 1)
-      }];
-    };
-
-    // 0, 1, 1, 2, 2, 3, 3, 4, 4,.....
-    const csa = (ri) => Math.round(ri / 2);
-
-    const sa = (o, ri, u, s) => [
-      { metric: 'storage',
-        quantity: u === 0 ?
-        csa(ri) : csa(resourceInstances - (s === 0 ? 0 : 1)) },
-      { metric: 'thousand_light_api_calls',
-        quantity: csa(ri) + u * csa(resourceInstances - (s === 0 ? 0 : 1)) },
-      { metric: 'heavy_api_calls',
-        quantity: 100 * (csa(ri) + u * csa(resourceInstances - (s === 0 ? 0 : 1))) }
-    ];
-
-    // 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, ......
-    const cspa = (ri) => Math.round(ri / 4 - 0.25);
-
-    const spa = (o, ri, u, s, p) => [
-       { metric: 'storage',
-         quantity: u === 0 ?
-        cspa(ri) : cspa(resourceInstances + ((s === 0) ? (p === 0 ? 2 : 0) : (p === 0 ? 1 : -1))) },
-       { metric: 'thousand_light_api_calls',
-        quantity: cspa(ri) + u * cspa(resourceInstances + ((s === 0) ? (p === 0 ? 2 : 0) : (p === 0 ? 1 : -1))) },
-       { metric: 'heavy_api_calls',
-        quantity: 100 * (cspa(ri) + u * cspa(resourceInstances + ((s === 0) ? (p === 0 ? 2 : 0) : (p === 0 ? 1 : -1)))) }
-     ];
-
-    const spagg = (o, ri, u, s) => {
-      if (ri < (2 + s) && (resourceInstances <= (2 + s) || u == 0)) {
-        return [{
-          plan_id: pid(0),
-          aggregated_usage: spa(o, ri + (s === 0 ? 3 : 2), u, s, 0)
-        }];
-      }
-
-      return [{
-        plan_id: pid(0),
-        aggregated_usage: spa(o, ri + (s === 0 ? 3 : 2), u, s, 0)
-      }, {
-        plan_id: pid(2),
-        aggregated_usage: spa(o, ri + (s === 0 ? 1 : 0), u, s, 1)
-      }];
-    };
-
-    // 0, 0, 0, 0, 0, 0, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, ......
-    const cca = (ri) => ri % 8 < 6 ? 2 * Math.round(ri / 8 - 0.5) : 2 * Math.round(ri / 8 - 0.5) + 1;
-
-    const ca = (o, ri, u, s, c) => [
-      { metric: 'storage',
-        quantity: (u === 0) ?
-        cca(ri) : cca(resourceInstances - 1 + (s === 0 ? (c === 0 ? 6 : 2) : (c === 0 ? 5 : 1))) },
-      { metric: 'thousand_light_api_calls',
-        quantity: cca(ri) + u * cca(resourceInstances - 1 + (s === 0 ? (c === 0 ? 6 : 2) : (c === 0 ? 5 : 1))) },
-      { metric: 'heavy_api_calls',
-        quantity: 100 * (cca(ri) + u * cca(resourceInstances - 1  + (s === 0 ? (c === 0 ? 6 : 2) : (c === 0 ? 5 : 1)))) }
-    ];
-
-    // 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2,......
-    const ccpa = (ri) => Math.round(ri / 8 - 0.50);
-
-    const cpa = (o, ri, u, s, c, p) => [
-       { metric: 'storage',
-         quantity: (u === 0) ?
-        ccpa(ri) : ccpa(resourceInstances - 1 + ((s === 0) ? ((c === 0) ? (p === 0 ? 8 : 6) : (p === 0 ? 4 : 2)) : ((c === 0) ? (p === 0 ? 7 : 5) : (p === 0 ? 3 : 1)))) },
-       { metric: 'thousand_light_api_calls',
-        quantity: ccpa(ri) + u * ccpa(resourceInstances - 1 + ((s === 0) ? ((c === 0) ? (p === 0 ? 8 : 6) : (p === 0 ? 4 : 2)) : ((c === 0) ? (p === 0 ? 7 : 5) : (p === 0 ? 3 : 1)))) },
-       { metric: 'heavy_api_calls',
-        quantity: 100 * (ccpa(ri) + u * ccpa(resourceInstances - 1 + ((s === 0) ? ((c === 0) ? (p === 0 ? 8 : 6) : (p === 0 ? 4 : 2)) : ((c === 0) ? (p === 0 ? 7 : 5) : (p === 0 ? 3 : 1))))) }
-     ];
-
     // Total resource instances index
-    const tri = () => resourceInstances - 1;
-    const create = (p, c) => map(range(p() ? 1 : 2), (i) => c(i));
+    const tri = resourceInstances - 1;
+    const agg = (p, a) => map(range(p() ? 1 : 2), (i) => a(i));
+    const a = (ri, u, p, count) => [
+      { metric: 'storage', quantity: u === 0 ? count(ri, p) : count(tri, p) },
+      { metric: 'thousand_light_api_calls',
+        quantity: count(ri, p) + u * count(tri, p) },
+      { metric: 'heavy_api_calls',
+        quantity: 100 * (count(ri, p) + u * count(tri, p)) }
+    ];
 
-    const scpagg = (o, ri, u, s, c) =>
-      create(() => (tri < (c === 0 ? (2 + s) : (6 + s)) ||
-        ((ri < (c === 0 ? (2 + s) : (6 + s))) && u === 0)), (i) => ({
+    const scpagg = (o, ri, u, s, c) => {
+      const shift = (p) =>
+        (s === 0 ? c === 0 ? 8 : 4 : c === 0 ? 7 : 3) - (p === 0 ? 0 : 2);
+
+      // 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1,
+      // 2, 2, 2, 2, 2, 2, 2, 2, 3, ......
+      const count = (n, p) => Math.round((n + shift(p)) / 8 - 0.50);
+
+      return agg(() => tri < (c === 0 ? 2 + s : 6 + s) ||
+        ri < (c === 0 ? 2 + s : 6 + s) && u === 0, (i) => ({
           plan_id: pid(i === 0 ? 0 : 2),
-          aggregated_usage: cpa(o, ri + ((i === 0) ?
-            (s=== 0 ? (c === 0 ? 8 : 4) : (c === 0 ? 7 : 3)) :
-            (s=== 0 ? (c === 0 ? 6 : 2) : (c === 0 ? 5 : 1))), u, s, c, i),
+          aggregated_usage: a(ri, u, i, count)
         }));
+    };
 
-    const scagg = (o, ri, u, s) =>
-      create(() => (tri < (4 + s)) || (ri < (4 + s) && u === 0), (i) => ({
-        consumer_id: cid(o, (i === 0) ? s : (s === 0 ? 4 : 5)),
+    const scagg = (o, ri, u, s) => {
+      const shift = (c) => (s === 0 ? 6 : 5) - (c === 0 ? 0 : 4);
+
+      // 0, 0, 0, 0, 0, 0, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 4, 4, 4, 4, 4, 4,
+      // 5, 5, 6, .....
+      const count = (n, c) => {
+        const nri = n + shift(c);
+        return 2 * Math.round(nri / 8 - 0.50) + (nri % 8 < 6 ? 0 : 1);
+      };
+
+      return agg(() => tri < 4 + s || ri < 4 + s && u === 0, (i) => ({
+        consumer_id: cid(o, i === 0 ? s : s === 0 ? 4 : 5),
         resources: [{
           resource_id: 'object-storage',
-          aggregated_usage: ca(o, ri + ((i === 0) ?
-            (s === 0 ? 6 : 5) : (s === 0 ? 2 : 1)), u, s, i),
+          aggregated_usage: a(ri, u, i, count),
           plans: scpagg(o, ri, u, s, i)
         }]
       }));
+    };
 
-    const osagg = (o, ri, u) =>
-      create(() => tri === 0 || (ri === 0 &&  u === 0), (i) => ({
+    const spagg = (o, ri, u, s) => {
+      const shift = (p) => (s === 0 ? 3 : 2) - (p === 0 ? 0 : 2);
+
+      // 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, ......
+      const count = (n, p) => Math.round((n + shift(p)) / 4 - 0.25);
+
+      return agg(() => tri < 2 + s || ri < 2 + s && u === 0, (i) => ({
+        plan_id: pid(i === 0 ? 0 : 2),
+        aggregated_usage: a(ri, u, i, count)
+      }));
+    };
+
+    const osagg = (o, ri, u) => {
+      const shift = (s) => s === 0 ? 1 : 0;
+
+      // 0, 1, 1, 2, 2, 3, 3, 4, 4,.....
+      const count = (n, s) => Math.round((n + shift(s)) / 2);
+
+      return agg(() => tri === 0 || ri === 0 && u === 0, (i) => ({
         space_id: sid(o, i),
         resources: [{
           resource_id: 'object-storage',
-          aggregated_usage: sa(o, ri + (i === 0 ? 1 : 0), u, i),
+          aggregated_usage: a(ri, u, i, count),
           plans: spagg(o, ri, u, i)
         }],
         consumers: scagg(o, ri, u, i)
       }));
+    };
+
+    const opagg = (o, ri, u) => {
+      const shift = (p) => p === 0 ? 2 : 0;
+
+      // 0, 0, 1, 2, 2, 2, 3, 4, 4, 4, 5, 6, 6, 6, 7, 8, 8, 8, ...........
+      const count = (n, p) => {
+        const nri = n + shift(p);
+
+        return Math.round(nri / 2 +
+          (nri % 2 === 0 ? 0 : 0.5) * ((nri / 2 - 0.5) % 2 === 0 ? -1 : 1));
+      };
+
+      return agg(() => tri < 2 || ri < 2 && u === 0, (i) => ({
+        plan_id: pid(i === 0 ? 0 : 2),
+        aggregated_usage: a(ri, u, i, count)
+      }));
+    };
 
     // Aggregated usage for a given org, resource instance, usage #s
     const aggregatedTemplate = (o, ri, u) => ({
@@ -312,7 +260,7 @@ describe('abacus-usage-aggregator-itest', () => {
       end: eod(end + u),
       resources: [{
         resource_id: 'object-storage',
-        aggregated_usage: oa(o, ri, u),
+        aggregated_usage: a(ri, u, undefined, (n) => n + 1),
         plans: opagg(o, ri, u)
       }],
       spaces: osagg(o, ri, u)
@@ -323,7 +271,10 @@ describe('abacus-usage-aggregator-itest', () => {
       debug('Submit accumulated usage for org%d instance%d usage%d',
         o + 1, ri + 1, u + 1);
 
-      console.log('accumulated: ', require('util').inspect(accumulatedTemplate(o, ri, u), { depth: null }));
+      console.log('accumulated: ',
+        require('util').inspect(accumulatedTemplate(o, ri, u),
+          { depth: null }));
+
       brequest.post('http://localhost::p/v1/metering/accumulated/usage',
         { p: 9200, body: accumulatedTemplate(o, ri, u) }, (err, val) => {
           expect(err).to.equal(undefined);
@@ -340,9 +291,11 @@ describe('abacus-usage-aggregator-itest', () => {
             expect(err).to.equal(undefined);
             expect(val.statusCode).to.equal(200);
 
-
-            console.log('aggregated: ', require('util').inspect(val.body, { depth: null }));
-            console.log('expected: ', require('util').inspect(aggregatedTemplate(o, ri, u), { depth: null }));
+            console.log('aggregated: ',
+              require('util').inspect(val.body, { depth: null }));
+            console.log('expected: ',
+              require('util').inspect(aggregatedTemplate(o, ri, u),
+              { depth: null }));
 
             expect(omit(val.body, ['id'])).to.deep
               .equal(aggregatedTemplate(o, ri, u));

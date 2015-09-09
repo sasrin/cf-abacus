@@ -25,7 +25,7 @@
   "scripts": {
     "itest": "mocha --command",
     "babel": "babel",
-    "test": "echo true",
+    "test": "eslint",
     "lint": "eslint",
     "pub": "publish"
   },
