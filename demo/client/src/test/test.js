@@ -151,14 +151,17 @@ describe('abacus-demo-client', () => {
           aggregated_usage: [{
             metric: 'storage',
             quantity: 1,
+            summary: 1,
             charge: 1
           }, {
             metric: 'thousand_light_api_calls',
             quantity: 3,
+            summary: 3,
             charge: 0.09
           }, {
             metric: 'heavy_api_calls',
             quantity: 300,
+            summary: 300,
             charge: 45
           }],
           plans: [{
@@ -167,16 +170,19 @@ describe('abacus-demo-client', () => {
             aggregated_usage: [{
               metric: 'storage',
               quantity: 1,
+              summary: 1,
               cost: 1,
               charge: 1
             }, {
               metric: 'thousand_light_api_calls',
               quantity: 3,
+              summary: 3,
               cost: 0.09,
               charge: 0.09
             }, {
               metric: 'heavy_api_calls',
               quantity: 300,
+              summary: 300,
               cost: 45,
               charge: 45
             }]
@@ -191,14 +197,17 @@ describe('abacus-demo-client', () => {
             aggregated_usage: [{
               metric: 'storage',
               quantity: 1,
+              summary: 1,
               charge: 1
             }, {
               metric: 'thousand_light_api_calls',
               quantity: 3,
+              summary: 3,
               charge: 0.09
             }, {
               metric: 'heavy_api_calls',
               quantity: 300,
+              summary: 300,
               charge: 45
             }],
             plans: [{
@@ -207,16 +216,19 @@ describe('abacus-demo-client', () => {
               aggregated_usage: [{
                 metric: 'storage',
                 quantity: 1,
+                summary: 1,
                 cost: 1,
                 charge: 1
               }, {
                 metric: 'thousand_light_api_calls',
                 quantity: 3,
+                summary: 3,
                 cost: 0.09,
                 charge: 0.09
               }, {
                 metric: 'heavy_api_calls',
                 quantity: 300,
+                summary: 300,
                 cost: 45,
                 charge: 45
               }]
@@ -231,14 +243,17 @@ describe('abacus-demo-client', () => {
               aggregated_usage: [{
                 metric: 'storage',
                 quantity: 1,
+                summary: 1,
                 charge: 1
               }, {
                 metric: 'thousand_light_api_calls',
                 quantity: 3,
+                summary: 3,
                 charge: 0.09
               }, {
                 metric: 'heavy_api_calls',
                 quantity: 300,
+                summary: 300,
                 charge: 45
               }],
               plans: [{
@@ -247,16 +262,19 @@ describe('abacus-demo-client', () => {
                 aggregated_usage: [{
                   metric: 'storage',
                   quantity: 1,
+                  summary: 1,
                   cost: 1,
                   charge: 1
                 }, {
                   metric: 'thousand_light_api_calls',
                   quantity: 3,
+                  summary: 3,
                   cost: 0.09,
                   charge: 0.09
                 }, {
                   metric: 'heavy_api_calls',
                   quantity: 300,
+                  summary: 300,
                   cost: 45,
                   charge: 45
                 }]
@@ -293,7 +311,7 @@ describe('abacus-demo-client', () => {
       // report for our test resource
       const processed = (val) => {
         try {
-          return val.body.resources[0].aggregated_usage[1].quantity;
+          return val.body.resources[0].aggregated_usage[1].summary;
         }
         catch (e) {
           // The response doesn't contain a valid report
@@ -301,20 +319,19 @@ describe('abacus-demo-client', () => {
         }
       };
 
-      // Format a date like expected by the reporting service
-      const numFmt = (num, mask) => (mask + num).slice(-Math.max(mask.length,
-        (num + '').length));
-      const day = (d) => util.format('%s-%s-%s',
-        numFmt(d.getUTCFullYear(), '0000'),
-        numFmt(d.getUTCMonth() + 1, '00'),
-        numFmt(d.getUTCDate(), '00'));
+      // Return the reporting day for the given time
+      const day = (t) => {
+        const d = new Date(t);
+        return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+      };
 
       // Get a usage report for the test organization
       let gets = 0;
       const get = (done) => {
         request.get(reporting +
-          '/v1/organizations/a3d7fe4d-3cb1-4cc3-a831-ffe98e20cf27/usage/:day', {
-            day: day(new Date(start))
+          '/v1/organizations/a3d7fe4d-3cb1-4cc3-a831-ffe98e20cf27/usage/:time',
+          {
+            time: day(start)
           }, (err, val) => {
             expect(err).to.equal(undefined);
             expect(val.statusCode).to.equal(200);
