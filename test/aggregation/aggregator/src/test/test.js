@@ -120,18 +120,46 @@ describe('abacus-usage-aggregator-itest', () => {
     const start = 1435629365220 + tshift;
     const end = 1435629465220 + tshift;
 
+    // Usage template index values for a given org
+    //  Usage  ResourceInstance  Space Plan Consumer(with space)
+    //    0           0            0    0        0-0
+    //    0           1            1    0        1-0
+    //    0           2            0    1        0-0
+    //    0           3            1    1        1-0
+    //    0           4            0    0        0-1
+    //    0           5            1    0        1-1
+    //    0           6            0    1        0-1
+    //    0           7            1    1        1-1
+    //    0           8            0    0        0-0
+    //    0           9            1    0        1-0
+    //    0          10            0    1        0-0
+    //    1           0            0    0        0-0
+    //    1           1            1    0        1-0
+
+    // Organization id based on org index
     const oid = (o) => ['a3d7fe4d-3cb1-4cc3-a831-ffe98e20cf27',
       o + 1].join('-');
+
+    // One of the two regions based on an org index
     const rid = (o) => o % 2 === 0 ? 'us-south' : 'eu-gb';
+
+    // One of the two spaces at a given org based on resource instance index
     const sid = (o, ri) => ['aaeae239-f3f8-483c-9dd0-de5d41c38b6a',
       o + 1, ri % 2 === 0 ? 1 : 2].join('-');
+
+    // One of the two consumers at a given org and derived space based on
+    // resource instance index
     const cid = (o, ri) => ['bbeae239-f3f8-483c-9dd0-de6781c38bab',
       o + 1, ri % 2 === 0 ? 1 : 2, ri % 8 < 4 ? 1 : 2].join('-');
+
+    // One of the two plans based on resource instance index
     const pid = (ri) => ri % 4 < 2 ? 'basic' : 'advanced';
 
+    // Resource instance id based on org and resouce instance indices
     const riid = (o, ri) => ['0b39fa70-a65f-4183-bae8-385633ca5c87',
       o + 1, ri + 1].join('-');
 
+    // Usage and usage batch ids
     const uid = (o, ri, u) => [start, o + 1, ri + 1, u + 1].join('-');
     const bid = (u) => [start, u + 1].join('-');
 
@@ -162,7 +190,16 @@ describe('abacus-usage-aggregator-itest', () => {
 
     // Total resource instances index
     const tri = resourceInstances - 1;
-    const agg = (p, a) => map(range(p() ? 1 : 2), (i) => a(i));
+
+    // Create an array of objects based on a range and a creator function
+    const create = (number, creator) =>
+      map(range(number()), (i) => creator(i));
+
+    // Aggregate metrics based on ressource instance, usage and plan indices
+    // For max, we use either the current count or the totat count based on
+    // resource instance index
+    // For sum, we use current count + total count based on resource instance
+    // and usage index
     const a = (ri, u, p, count) => [
       { metric: 'storage', quantity: u === 0 ? count(ri, p) : count(tri, p) },
       { metric: 'thousand_light_api_calls',
@@ -171,24 +208,37 @@ describe('abacus-usage-aggregator-itest', () => {
         quantity: 100 * (count(ri, p) + u * count(tri, p)) }
     ];
 
+    // Resouce plan level aggregations for a given consumer at given space
     const scpagg = (o, ri, u, s, c) => {
+      // Resource instance index shift to locate a value at count number
+      // sequence specified below
       const shift = (p) =>
         (s === 0 ? c === 0 ? 8 : 4 : c === 0 ? 7 : 3) - (p === 0 ? 0 : 2);
 
+      // Number sequence representing count for a given space, consumer and
+      // plan based on specified spread using id generators
       // 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1,
       // 2, 2, 2, 2, 2, 2, 2, 2, 3, ......
       const count = (n, p) => Math.round((n + shift(p)) / 8 - 0.50);
 
-      return agg(() => tri < (c === 0 ? 2 + s : 6 + s) ||
-        ri < (c === 0 ? 2 + s : 6 + s) && u === 0, (i) => ({
+      // Number of plans at a given space, consumer and
+      // resource instance indices
+      const plans = () => u === 0 && ri <= (c === 0 ? 1 + s : 5 + s) ||
+        tri <= (c === 0 ? 1 + s : 5 + s) ? 1 : 2;
+
+      // Create plan aggregations
+      return create(plans, (i) => ({
           plan_id: pid(i === 0 ? 0 : 2),
           aggregated_usage: a(ri, u, i, count)
         }));
     };
 
+    // Consumer level resource aggregations for a given space
     const scagg = (o, ri, u, s) => {
+      // Resource instance index shift
       const shift = (c) => (s === 0 ? 6 : 5) - (c === 0 ? 0 : 4);
 
+      // Number sequence of count
       // 0, 0, 0, 0, 0, 0, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 4, 4, 4, 4, 4, 4,
       // 5, 5, 6, .....
       const count = (n, c) => {
@@ -196,7 +246,11 @@ describe('abacus-usage-aggregator-itest', () => {
         return 2 * Math.round(nri / 8 - 0.50) + (nri % 8 < 6 ? 0 : 1);
       };
 
-      return agg(() => tri < 4 + s || ri < 4 + s && u === 0, (i) => ({
+      // Number of consumers at a given resource instance and space indices
+      const consumers = () => u === 0 && ri <= 3 + s || tri <= 3 + s ? 1 : 2;
+
+      // Create resource aggregations
+      return create(consumers, (i) => ({
         consumer_id: cid(o, i === 0 ? s : s === 0 ? 4 : 5),
         resources: [{
           resource_id: 'object-storage',
@@ -206,25 +260,39 @@ describe('abacus-usage-aggregator-itest', () => {
       }));
     };
 
+    // Resource plan level aggregations for a given space
     const spagg = (o, ri, u, s) => {
+      // resource instance index shift
       const shift = (p) => (s === 0 ? 3 : 2) - (p === 0 ? 0 : 2);
 
+      // Number sequence of count
       // 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, ......
       const count = (n, p) => Math.round((n + shift(p)) / 4 - 0.25);
 
-      return agg(() => tri < 2 + s || ri < 2 + s && u === 0, (i) => ({
+      // Number of plans at a given resource instance and space indices
+      const plans = () => u === 0 && ri <= 1 + s || tri <= 1 + s ? 1 : 2;
+
+      // Create plan level aggregations
+      return create(plans, (i) => ({
         plan_id: pid(i === 0 ? 0 : 2),
         aggregated_usage: a(ri, u, i, count)
       }));
     };
 
+    // Space level resource aggregations for a given organization
     const osagg = (o, ri, u) => {
+      // Resource instance index shift
       const shift = (s) => s === 0 ? 1 : 0;
 
+      // Number sequnce of count
       // 0, 1, 1, 2, 2, 3, 3, 4, 4,.....
       const count = (n, s) => Math.round((n + shift(s)) / 2);
 
-      return agg(() => tri === 0 || ri === 0 && u === 0, (i) => ({
+      // Number of spaces at a given resource index
+      const spaces = () => u === 0 && ri === 0 || tri === 0 ? 1 : 2;
+
+      // Create resource instance aggregations
+      return create(spaces, (i) => ({
         space_id: sid(o, i),
         resources: [{
           resource_id: 'object-storage',
@@ -235,9 +303,12 @@ describe('abacus-usage-aggregator-itest', () => {
       }));
     };
 
+    // Resource plan level aggregations for a given organization
     const opagg = (o, ri, u) => {
+      // Resource instance index shift
       const shift = (p) => p === 0 ? 2 : 0;
 
+      // Number sequence of count
       // 0, 0, 1, 2, 2, 2, 3, 4, 4, 4, 5, 6, 6, 6, 7, 8, 8, 8, ...........
       const count = (n, p) => {
         const nri = n + shift(p);
@@ -246,13 +317,17 @@ describe('abacus-usage-aggregator-itest', () => {
           (nri % 2 === 0 ? 0 : 0.5) * ((nri / 2 - 0.5) % 2 === 0 ? -1 : 1));
       };
 
-      return agg(() => tri < 2 || ri < 2 && u === 0, (i) => ({
+      // Number of plans at a given resource instance index
+      const plans = () => u === 0 && ri <= 1 || tri <= 1 ? 1 : 2;
+
+      // Create plan aggregations
+      return create(plans, (i) => ({
         plan_id: pid(i === 0 ? 0 : 2),
         aggregated_usage: a(ri, u, i, count)
       }));
     };
 
-    // Aggregated usage for a given org, resource instance, usage #s
+    // Aggregated usage for a given org, resource instance, usage indices
     const aggregatedTemplate = (o, ri, u) => ({
       accumulated_usage_id: uid(o, ri, u),
       organization_id: oid(o),
