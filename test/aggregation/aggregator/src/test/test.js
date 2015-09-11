@@ -274,7 +274,7 @@ describe('abacus-usage-aggregator-itest', () => {
       return create(consumers, (i) => ({
         consumer_id: cid(o, i === 0 ? s : s === 0 ? 4 : 5),
         resources: [{
-          resource_id: 'object-storage',
+          resource_id: 'test-resource',
           aggregated_usage: a(ri, u, i, count),
           plans: scpagg(o, ri, u, s, i)
         }]
@@ -316,7 +316,7 @@ describe('abacus-usage-aggregator-itest', () => {
       return create(spaces, (i) => ({
         space_id: sid(o, i),
         resources: [{
-          resource_id: 'object-storage',
+          resource_id: 'test-resource',
           aggregated_usage: a(ri, u, i, count),
           plans: spagg(o, ri, u, i)
         }],
@@ -355,7 +355,7 @@ describe('abacus-usage-aggregator-itest', () => {
       start: day(end + u),
       end: eod(end + u),
       resources: [{
-        resource_id: 'object-storage',
+        resource_id: 'test-resource',
         aggregated_usage: a(ri, u, undefined, (n) => n + 1),
         plans: opagg(o, ri, u)
       }],
