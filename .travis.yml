@@ -1,12 +1,21 @@
 language: node_js
 install: echo "install"
-script: npm run build
+script:
+- ./bin/travis
 after_script: npm run coveralls
 node_js:
 - '4.0'
 - 'iojs'
 - '0.12'
 - '0.10'
+matrix:
+  fast_finish: true
+  allow_failures:
+  - env: TEST=itest
+env:
+  matrix:
+  - TEST=test
+  - TEST=itest
 notifications:
   irc:
     use_notice: true

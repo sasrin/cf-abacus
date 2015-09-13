@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -ev
+
+npm run build
+
+if [ "${TEST}" = "test" ]; then
+  npm run test
+fi
+
+if [ "${TEST}" = "itest" ]; then
+  npm run itest -- -o 15 -i 15 -o 15
+fi
