@@ -5,6 +5,8 @@
 // Implemented in ES5 for now
 /* eslint no-var: 0 */
 
+if(process.env.LONGJOHN)
+  require('longjohn');
 var _ = require('underscore');
 var path = require('path');
 var util = require('util');
@@ -152,16 +154,13 @@ var runCLI = function() {
     commander.istanbul = false;
     commander.color = true;
   }
-  else {
+  else
     commander
       .option('--no-istanbul', 'do not instrument with Istanbul')
-      .option('-i, --istanbul <regex>',
+      .option('-i, --istanbul-includes <regex>',
         'instrument matching modules with Istanbul [abacus]', 'abacus')
       .option('--no-color', 'do not colorify output')
       .parse(process.argv);
-    if(commander.istanbul === true)
-      commander.istanbul = 'abacus';
-  }
 
   // Time the execution of the tests
   var t0 = new Date();
@@ -185,7 +184,8 @@ var runCLI = function() {
   var maps = [];
   if(commander.istanbul)
     istanbul.hook.hookRequire(
-      instrumentMatcher(commander.istanbul), transformer(sources, maps));
+      instrumentMatcher(commander.istanbulIncludes),
+      transformer(sources, maps));
 
   // Run the test with Mocha
   var testDir = path.join(target(), 'test');
