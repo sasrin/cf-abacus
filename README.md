@@ -21,7 +21,7 @@ Frequently Asked Questions (FAQs)
 
 1. How to get Usage Data from CF?
 
-  We are currently building a prototype for reporting CF apps usage data to Abacus. You can have a look at the bridge source.
+  We are currently building a prototype for reporting CF apps usage data to Abacus. You can have a look at the [bridge source](https://github.com/cloudfoundry-incubator/cf-abacus/tree/master/lib/cf/bridge).
   
   What we currently do is to:
   * obtain oauth token 
@@ -152,7 +152,7 @@ abacus-usage-reporting     started           1/1         512M     512M   abacus-
 abacus-dbserver            started           1/1         1G       512M   abacus-dbserver.10.244.0.34.xip.io   
 ```
 
-Running the demo
+Running the demo on Cloud Foundry
 ---
 
 The Abacus demo runs a simple test program that simulates the submission of usage by a Cloud service provider, then gets a daily report for the usage aggregated within a Cloud Foundry organization.
@@ -192,6 +192,11 @@ npm run demo
 # Stop everything
 npm stop
 ```
+
+Meter Cloud Foundry App Usage
+---
+
+Abacus comes with a [bridge](lib/cf/bridge) that acts as a Service Provider. It reads Cloud Foundry's [App Usage Events](http://apidocs.cloudfoundry.org/runtime-passed/app_usage_events/list_all_app_usage_events.html) and reports usage to the `abacus-usage-collector`. In the end it enables you to see usage reports for your Cloud Foundry instance. In order to start the bridge follow its [readme](lib/cf/bridge/README.md) 
 
 Layout
 ---
