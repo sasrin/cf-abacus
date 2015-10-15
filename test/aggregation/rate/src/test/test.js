@@ -77,9 +77,11 @@ const cextend = (o, interceptor) => {
 const addResourceWindows = (r) => {
   r.aggregated_usage = map(r.aggregated_usage, (u) => ({
     metric: u.metric,
-    windows: map(u.quantity, (q) => ({
-      quantity: q
-    }))
+    windows: map(u.quantity, (w) => {
+      return map(w, (q) => ({
+        quantity: q
+      }));
+    })
   }));
   return r;
 }
@@ -117,10 +119,12 @@ const addCost = (k, v) => {
     // Warning: mutating aggregated_usage to include cost
     p.aggregated_usage = map(p.aggregated_usage, (u) => ({
       metric: u.metric,
-      windows: map(u.quantity, (q) => ({
-        quantity: q,
-        cost: q * cost[p.plan_id][u.metric]
-      }))
+      windows: map(u.quantity, (w) => {
+        return map(w, (q) => ({
+          quantity: q,
+          cost: q * cost[p.plan_id][u.metric]
+        }));
+      })
     }));
 
     return p;
@@ -162,7 +166,7 @@ const buildAggregatedQuantity = (p, u, ri, tri, count, end, f) => {
 
     // Get the millisecond equivalent of the very start of the given window
     const windowTime = revertUTCNumber(windowTimeNum).getTime();
-    return f(p, Math.min(time - windowTime, u), ri, tri, count);
+    return [f(p, Math.min(time - windowTime, u), ri, tri, count)];
   });
   return quantity;
 };
@@ -427,7 +431,7 @@ describe('abacus-usage-rate-itest', () => {
       debug('Submit aggregated usage for org%d instance%d usage%d',
         o + 1, ri + 1, u + 1);
 
-      brequest.post('http://localhost::p/v1/rating/usage',
+      brequest.post('http://localhost::p/v1/rating/aggregated/usage',
         { p: 9410, body: aggregatedTemplate(o, ri, u) }, (err, val) => {
           expect(err).to.equal(undefined);
           expect(val.statusCode).to.equal(201);
