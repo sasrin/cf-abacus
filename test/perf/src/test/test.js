@@ -66,9 +66,9 @@ describe('abacus-perf-test', () => {
     console.log('Testing with %d orgs, %d resource instances, %d usage docs',
       orgs, resourceInstances, usage);
 
-    const timeout = Math.max(20000,
-      200 * orgs * resourceInstances * usage);
+    const timeout = Math.max(20000, 40 * orgs * resourceInstances * usage);
     this.timeout(timeout + 5000);
+    const giveup = Date.now() + timeout;
 
     console.log('Timeout %d', timeout);
 
@@ -330,12 +330,10 @@ describe('abacus-perf-test', () => {
 
 
     // Get a usage report for the test organization
-    let gets = 0;
     const get = (o, done) => {
       brequest.get('http://localhost:9088' + '/v1/metering/organizations' +
-        '/:organization_id/aggregated/usage/:time', extend({}, opt, {
-          organization_id: orgid(o),
-          time: end + usage
+        '/:organization_id/aggregated/usage', extend({}, opt, {
+          organization_id: orgid(o)
         }), (err, val) => {
           expect(err).to.equal(undefined);
           expect(val.statusCode).to.equal(200);
@@ -345,8 +343,8 @@ describe('abacus-perf-test', () => {
             processed(val), o + 1);
           try {
             expect(fixup(omit(
-              val.body, ['id', 'start', 'end']))).to.deep.equal(
-                fixup(report(o, resourceInstances, usage)));
+              val.body, 'id', 'processed', 'start', 'end')))
+                .to.deep.equal(fixup(report(o, resourceInstances, usage)));
 
             console.log('\n', util.inspect(fixup(val.body), {
               depth: 15
@@ -357,13 +355,12 @@ describe('abacus-perf-test', () => {
           catch (e) {
             // If the comparison fails we'll be called again to retry
             // after 250 msec, but give up after the computed timeout
-            /*
-            console.log('\n', util.inspect(fixup(val.body), {
-              depth: 15
-            }), '\n');
-            */
-
-            if(++gets >= orgs * timeout / 250) throw e;
+            if(Date.now() >= giveup) {
+              console.log('\n', util.inspect(fixup(val.body), {
+                depth: 15
+              }), '\n');
+              throw e;
+            }
           }
         });
     };
