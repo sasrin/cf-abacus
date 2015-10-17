@@ -2,7 +2,7 @@
   "name": "abacus-usage-aggregator",
   "description": "Usage aggregator service",
   "license": "Apache-2.0",
-  "version": "0.0.2-rc.0",
+  "version": "0.0.2-rc.1",
   "private": true,
   "homepage": "https://github.com/cloudfoundry-incubator/cf-abacus/lib/aggregation/aggregator",
   "bugs": {
@@ -52,6 +52,7 @@
   },
   "devDependencies": {
     "abacus-babel": "file:../../../tools/babel",
+    "abacus-batch": "file:../../utils/batch",
     "abacus-cfpack": "file:../../../tools/cfpack",
     "abacus-eslint": "file:../../../tools/eslint",
     "abacus-mocha": "file:../../../tools/mocha",
