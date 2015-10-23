@@ -1,10 +1,10 @@
 {
-  "name": "abacus-dbclient",
-  "description": "Subset of the PouchDB API over a set of DB partitions",
+  "name": "abacus-dedupe",
+  "description": "Duplicate detection using a LRU cache and bloom filters",
   "license": "Apache-2.0",
   "version": "0.0.2-rc.1",
   "private": true,
-  "homepage": "https://github.com/cloudfoundry-incubator/cf-abacus/lib/utils/dbclient",
+  "homepage": "https://github.com/cloudfoundry-incubator/cf-abacus/lib/utils/dedupe",
   "bugs": {
     "url": "https://github.com/cloudfoundry-incubator/cf-abacus/issues"
   },
@@ -30,17 +30,12 @@
   },
   "dependencies": {
     "abacus-debug": "file:../debug",
-    "abacus-partition": "file:../partition",
-    "abacus-perf": "file:../perf",
-    "abacus-request": "file:../request",
-    "abacus-transform": "file:../transform",
-    "memdown": "^1.1.0",
-    "pouchdb": "^5.0.0",
+    "bloem": "^0.2.4",
+    "lru-cache": "^2.6.5",
     "underscore": "^1.8.3"
   },
   "devDependencies": {
     "abacus-babel": "file:../../../tools/babel",
-    "abacus-batch": "file:../batch",
     "abacus-eslint": "file:../../../tools/eslint",
     "abacus-mocha": "file:../../../tools/mocha",
     "abacus-publish": "file:../../../tools/publish"

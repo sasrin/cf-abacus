@@ -138,7 +138,7 @@ describe('abacus-usage-collector-itest', () => {
         resource_id: 'test-resource',
         plan_id: pid(ri, u),
         resource_instance_id: riid(o, ri),
-        consumer: { type: 'EXTERNAL', consumer_id: cid(o, ri) },
+        consumer_id: cid(o, ri),
         measured_usage: [
             { measure: 'storage', quantity: 1073741824 },
             { measure: 'light_api_calls', quantity: 1000 },
@@ -146,14 +146,14 @@ describe('abacus-usage-collector-itest', () => {
         ]
       }, {
         start: start + u,
-        end: end + u,
+        end: end + u + 1,
         region: rid(o),
         organization_id: oid(o),
         space_id: sid(o, ri),
         resource_id: 'test-resource',
         plan_id: pid(ri, u),
         resource_instance_id: riid(o, ri),
-        consumer: { type: 'EXTERNAL', consumer_id: cid(o, ri) },
+        consumer_id: cid(o, ri),
         measured_usage: [
             { measure: 'storage', quantity: 2147483648 },
             { measure: 'light_api_calls', quantity: 2000 },
