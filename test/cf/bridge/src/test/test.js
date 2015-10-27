@@ -224,12 +224,11 @@ describe('abacus-cf-bridge-itest', () => {
     }, timeout);
   };
 
-  it('submit runtime usage to usage collector', function(done) {
-    this.timeout(60000);
+  it('submit runtime usage to usage collector', (done) => {
 
     // Wait for bridge to start
     request.waitFor(
-      'http://localhost::p/v1/cf/bridge', { p: 9400 },
+      'http://localhost::p/v1/cf/bridge', { p: 9500 },
       (err, uri, opts) => {
         // Failed to ping bridge before timing out
         if (err) throw err;
@@ -238,7 +237,6 @@ describe('abacus-cf-bridge-itest', () => {
         request.get(uri, opts, (err, response) => {
           expect(err).to.equal(undefined);
           expect(response.statusCode).to.equal(200);
-          expect(response.body).to.equal('Hello');
 
           poll(checkReport, done, 50000, 2000);
         });

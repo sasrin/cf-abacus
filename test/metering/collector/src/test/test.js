@@ -93,8 +93,8 @@ describe('abacus-usage-collector-itest', () => {
 
   it('collect measured usage submissions', function(done) {
     // Configure the test timeout based on the number of usage docs, with
-    // a minimum of 20 secs
-    const timeout = Math.max(20000,
+    // a minimum of 60 secs
+    const timeout = Math.max(60000,
       100 * orgs * resourceInstances * usage);
     this.timeout(timeout + 2000);
 
@@ -109,7 +109,7 @@ describe('abacus-usage-collector-itest', () => {
     routes.post('/v1/metering/normalized/usage', meter);
     app.use(routes);
     app.use(router.batch(routes));
-    app.listen(9081);
+    app.listen(9100);
 
     // Initialize usage doc properties with unique values
     const start = 1435629365220 + tshift;

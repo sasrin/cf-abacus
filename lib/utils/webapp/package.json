@@ -35,6 +35,7 @@
   "dependencies": {
     "abacus-cluster": "file:../cluster",
     "abacus-debug": "file:../debug",
+    "abacus-eureka": "file:../eureka",
     "abacus-express": "file:../express",
     "abacus-hystrix": "file:../hystrix",
     "abacus-perf": "file:../perf",
