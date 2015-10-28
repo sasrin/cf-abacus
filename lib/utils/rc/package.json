@@ -1,10 +1,10 @@
 {
-  "name": "abacus-launcher",
-  "description": "Launch multiple instances of an application",
+  "name": "abacus-rc",
+  "description": "Populates the application environment from an rc file",
   "license": "Apache-2.0",
   "version": "0.0.2-rc.2",
   "private": true,
-  "homepage": "https://github.com/cloudfoundry-incubator/cf-abacus/lib/utils/launcher",
+  "homepage": "https://github.com/cloudfoundry-incubator/cf-abacus/lib/utils/rc",
   "bugs": {
     "url": "https://github.com/cloudfoundry-incubator/cf-abacus/issues"
   },
@@ -18,14 +18,12 @@
   ],
   "files": [
     ".npmrc",
-    "launch",
+    ".test1rc",
+    ".test2rc",
     "lib/",
     "src/"
   ],
   "main": "lib/index.js",
-  "bin": {
-    "launch": "./launch"
-  },
   "scripts": {
     "babel": "babel",
     "test": "eslint && mocha",
@@ -34,9 +32,9 @@
   },
   "dependencies": {
     "abacus-debug": "file:../debug",
-    "abacus-rc": "file:../rc",
-    "abacus-vcapenv": "file:../vcapenv",
-    "commander": "^2.8.1",
+    "js-yaml": "^3.4.3",
+    "rc": "^1.1.2",
+    "strip-json-comments": "0.1.x",
     "underscore": "^1.8.3"
   },
   "devDependencies": {
