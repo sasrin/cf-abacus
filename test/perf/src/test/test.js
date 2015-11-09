@@ -21,6 +21,7 @@ const request = require('abacus-request');
 const throttle = require('abacus-throttle');
 const jwt = require('jsonwebtoken');
 const util = require('util');
+const BigNumber = require('bignumber.js');
 
 const map = _.map;
 const range = _.range;
@@ -85,7 +86,6 @@ describe('abacus-perf-test', () => {
       usage: [{
         start: start + i,
         end: end + i,
-        region: 'eu-gb',
         organization_id: orgid(o),
         space_id: 'aaeae239-f3f8-483c-9dd0-de5d41c38b6a',
         resource_id: 'object-storage',
@@ -105,9 +105,11 @@ describe('abacus-perf-test', () => {
     });
 
     // Compute the test costs
-    const storageCost = (nri, n) => 1.00 * nri;
-    const lightCost = (nri, n) => 0.03 * nri * n;
-    const heavyCost = (nri, n) => 0.15 * 100 * nri * n;
+    const storageCost = (nri, n) => new BigNumber(1.00).mul(nri).toNumber();
+    const lightCost = (nri, n) => new BigNumber(0.03)
+      .mul(nri).mul(n).toNumber();
+    const heavyCost = (nri, n) => new BigNumber(0.15)
+      .mul(100).mul(nri).mul(n).toNumber();
 
     const windows = (obj) => {
       const timewindows = [];
@@ -117,29 +119,29 @@ describe('abacus-perf-test', () => {
     }
     const rwindow = (nri, n, s, m, fn) => {
       return windows({
-        quantity: m * s,
-        summary: m * s,
+        quantity: new BigNumber(m).mul(s).toNumber(),
+        summary: new BigNumber(m).mul(s).toNumber(),
         charge: fn(nri, n)
       });
     };
     const pwindow = (nri, n, s, m, fn) => {
       return windows({
-        quantity: m * s,
-        summary: m * s,
+        quantity: new BigNumber(m).mul(s).toNumber(),
+        summary: new BigNumber(m).mul(s).toNumber(),
         cost: fn(nri, n),
         charge: fn(nri, n)
       });
     };
     const cwindow = (nri, n) => {
       return windows({
-        charge: storageCost(nri, n) + lightCost(nri, n) + heavyCost(nri, n)
+        charge: new BigNumber(storageCost(nri, n))
+          .add(lightCost(nri, n)).add(heavyCost(nri, n)).toNumber()
       });
     };
 
     // Return the expected usage report for the test organization
     const report = (o, nri, n) => ({
       organization_id: orgid(o),
-      region: 'eu-gb',
       windows: cwindow(nri, n),
       resources: [{
         resource_id: 'object-storage',

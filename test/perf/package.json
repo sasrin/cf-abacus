@@ -2,7 +2,7 @@
   "name": "abacus-perf-test",
   "description": "End to end performance test",
   "license": "Apache-2.0",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "private": true,
   "homepage": "https://github.com/cloudfoundry-incubator/cf-abacus/test/perf",
   "bugs": {
@@ -35,6 +35,7 @@
     "abacus-request": "file:../../lib/utils/request",
     "abacus-throttle": "file:../../lib/utils/throttle",
     "abacus-debug": "file:../../lib/utils/debug",
+    "bignumber.js": "^2.1.0",
     "jsonwebtoken": "^5.0.5",
     "underscore": "^1.8.3",
     "commander": "2.8.1"

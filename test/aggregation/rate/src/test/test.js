@@ -12,6 +12,7 @@ const dbclient = require('abacus-dbclient');
 const clone = require('abacus-clone');
 const seqid = require('abacus-seqid');
 const yieldable = require('abacus-yieldable');
+const BigNumber = require('bignumber.js');
 
 const map = _.map;
 const range = _.range;
@@ -102,7 +103,7 @@ const addWindows = (v, k) => {
         windows: map(u.quantity, (w) => {
           return map(w, (q) => ({
             quantity: q,
-            cost: q * cost[p.plan_id][u.metric]
+            cost: new BigNumber(q).mul(cost[p.plan_id][u.metric]).toNumber()
           }));
         })
       }));
@@ -249,9 +250,6 @@ describe('abacus-usage-rate-itest', () => {
     // Organization id based on org index
     const oid = (o) => ['a3d7fe4d-3cb1-4cc3-a831-ffe98e20cf27',
       o + 1].join('-');
-
-    // One of the two regions based on an org index
-    const rid = (o) => o % 2 === 0 ? 'us-south' : 'eu-gb';
 
     // One of the two spaces at a given org based on resource instance index
     const sid = (o, ri) => ['aaeae239-f3f8-483c-9dd0-de5d41c38b6a',
@@ -417,7 +415,6 @@ describe('abacus-usage-rate-itest', () => {
       organization_id: oid(o),
       start: day(end + u),
       end: eod(end + u),
-      region: rid(o),
       resources: [{
         resource_id: 'test-resource',
         aggregated_usage: a(ri, u, undefined, (n) => n + 1),

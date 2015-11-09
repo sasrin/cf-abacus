@@ -2,7 +2,7 @@
   "name": "abacus-usage-rate-itest",
   "description": "Usage rating service integration and performance tests",
   "license": "Apache-2.0",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "private": true,
   "homepage": "https://github.com/cloudfoundry-incubator/cf-abacus/test/aggregation/rate",
   "bugs": {
@@ -45,6 +45,7 @@
     "abacus-account-stub": "file:../../../lib/stubs/account",
     "abacus-debug": "file:../../../lib/utils/debug",
     "abacus-clone": "file:../../../lib/utils/clone",
+    "bignumber.js": "^2.1.0",
     "underscore": "^1.8.3",
     "commander": "2.8.1"
   },
