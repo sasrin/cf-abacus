@@ -2,16 +2,15 @@
 
 set -e
 
-# Start all the Abacus services
+# Create a BOSH release for Abacus
 export CONF=default
 if [ -n "$1" ]; then
   export CONF=$1
 fi
 
 for MODULE in $(node_modules/abacus-etc/apprc node_modules/abacus-etc/apps.rc $CONF apps); do
-  APPNAME=$(node_modules/abacus-etc/appname $MODULE)
-  (cd node_modules/$APPNAME && npm start)&
+  (cd $MODULE && npm run cfpack)
 done
 
-wait
+(cd etc/bosh && bosh create release --force --name cf-abacus)
 

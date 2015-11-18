@@ -36,6 +36,7 @@
     "abacus-debug": "file:../debug",
     "abacus-lock": "file:../lock",
     "abacus-transform": "file:../transform",
+    "babel-preset-es2015": "^6.1.4",
     "commander": "^2.8.1",
     "lru-cache": "^2.6.5",
     "request": "^2.37.0",
@@ -49,7 +50,7 @@
     "abacus-publish": "file:../../../tools/publish"
   },
   "engines": {
-    "node": ">=0.10.0",
+    "node": ">=0.12.0",
     "npm": ">=2.0.0"
   }
 }

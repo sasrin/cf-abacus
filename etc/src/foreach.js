@@ -30,7 +30,7 @@ var buildenv = _.extend(process.env, {
   MOCHA_COLORS: 'true'
 });
 
-// Throttle the execution of a function
+// Throttle the number of concurrent executions of a function
 var throttle = function(fn, max) {
   var running = 0;
   var queue = [];
@@ -58,8 +58,8 @@ var throttle = function(fn, max) {
   };
 };
 
-// Execute a command in a given module directory. We throttle this function to
-// limit the number of concurrent commands to a reasonable number.
+// Execute a command in a given module directory. We throttle the number of
+// concurrent jobs executing the command to a reasonable number.
 var exec = throttle(function(cmd, cwd, cb) {
   process.stdout.write(util.format('> %s: %s\n', cwd, cmd));
   var ex = cp.exec(cmd, {
@@ -89,7 +89,8 @@ var exec = throttle(function(cmd, cwd, cb) {
     // Call back when done
     cb(code !== 0 ? code : undefined, true);
   });
-}, process.env.THROTTLE ? parseInt(process.env.THROTTLE) : os.cpus().length);
+}, process.env.JOBS ?
+  parseInt(process.env.JOBS) : Math.min(os.cpus().length, 8));
 
 // Execute a build command for each Abacus module
 var runCLI = function() {
@@ -122,17 +123,17 @@ var runCLI = function() {
     function(dep) {
       return rx.test(dep[0]) && /^file:/.test(dep[1]);
     }), function(dep) {
-      var resolve = function(s) {
-        return s.replace(/\:name/, dep[0])
-          .replace(/:path/, dep[1].split(':')[1]);
-      };
+    var resolve = function(s) {
+      return s.replace(/\:name/, dep[0])
+        .replace(/:path/, dep[1].split(':')[1]);
+    };
 
-      // Run the given command on each module
-      exec(resolve([commander.cmd].concat(commander.args).join(' ')),
-        resolve(commander.dir), function(err, val) {
-          if(err) process.exit(err);
-        });
-    });
+    // Run the given command on each module
+    exec(resolve([commander.cmd].concat(commander.args).join(' ')),
+      resolve(commander.dir), function(err, val) {
+        if(err) process.exit(err);
+      });
+  });
 };
 
 // Export our CLI

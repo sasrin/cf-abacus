@@ -39,6 +39,7 @@
     "abacus-dbserver": "file:../../../lib/utils/dbserver",
     "abacus-usage-aggregator": "file:../../../lib/aggregation/aggregator",
     "abacus-debug": "file:../../../lib/utils/debug",
+    "babel-preset-es2015": "^6.1.4",
     "underscore": "^1.8.3",
     "commander": "2.8.1"
   },
@@ -48,7 +49,7 @@
     "abacus-publish": "file:../../../tools/publish"
   },
   "engines": {
-    "node": ">=0.10.0",
+    "node": ">=0.12.0",
     "npm": ">=2.0.0"
   }
 }
